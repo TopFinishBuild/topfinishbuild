@@ -616,7 +616,7 @@ function Calendar4() {
             })}
           </div>
           <div style={{ display:'flex', gap:24, padding:'14px 28px', borderTop:'1px solid rgba(255,255,255,0.07)', justifyContent:'center' }}>
-            {[[D4.orange,D4.navy,'Зает'],['rgba(255,255,255,0.1)','rgba(255,255,255,0.4)','Свободен']].map(([bg,tc,label])=>(
+            {[[D4.orange,D4.navy,'Зает'],['rgba(255,255,255,0.1)','rgba(255,255,255,0.4)','Свободен']].map(([bg,label])=>(
               <div key={label} style={{ display:'flex', alignItems:'center', gap:8, fontFamily:D4.fb, fontSize:12, color:'rgba(255,255,255,0.35)', textTransform:'uppercase', letterSpacing:'0.06em' }}>
                 <div style={{ width:10, height:10, borderRadius:2, background:bg }}/>{label}
               </div>
@@ -840,7 +840,7 @@ function Pricing4() {
 
               {items.map((it, idx) => {
                 const isChecked = checked.has(idx);
-                const svc = CALC_SERVICES.find(s=>s.id===it.serviceId);
+                // const svc = CALC_SERVICES.find(s=>s.id===it.serviceId);
                 return (
                   <div key={idx} style={{
                     display:'grid', gridTemplateColumns:'32px 1fr 130px 90px 32px', gap:8, padding:'14px 24px', alignItems:'center',
