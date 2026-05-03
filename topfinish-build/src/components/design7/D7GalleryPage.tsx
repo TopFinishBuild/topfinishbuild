@@ -102,27 +102,19 @@ export default function D7GalleryPage({ onNavigate }: D7GalleryPageProps) {
       {/* Lightbox */}
       {current && lightbox !== null && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(10,18,40,0.96)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(10,18,40,0.96)', display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'center', paddingTop: isMobile ? 'env(safe-area-inset-top, 8px)' : 0 }}
           onClick={closeLightbox}
           {...swipe}
         >
-          {/* Close */}
-          <button
-            onClick={closeLightbox}
-            style={{ position: 'absolute', top: 20, right: 24, background: 'none', border: 'none', color: '#fff', cursor: 'pointer', opacity: 0.7, lineHeight: 1 }}
-          >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-
           {/* Modal — strictly fixed size, nothing inside can change it */}
           <div
             onClick={e => e.stopPropagation()}
             style={{
               display: 'flex',
               flexDirection: isMobile ? 'column' : 'row',
-              width: isMobile ? '92vw' : 'min(90vw, 1200px)',
-              height: isMobile ? '86vh' : 'min(88vh, 780px)',
-              borderRadius: 12,
+              width: isMobile ? '100vw' : 'min(90vw, 1200px)',
+              height: isMobile ? 'calc(100dvh - env(safe-area-inset-top, 8px))' : 'min(88vh, 780px)',
+              borderRadius: isMobile ? 0 : 12,
               overflow: 'hidden',
               boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
             }}
@@ -142,6 +134,14 @@ export default function D7GalleryPage({ onNavigate }: D7GalleryPageProps) {
                 alt={current.label}
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
               />
+              {/* Close — inside image zone top-right */}
+              <button
+                onClick={e => { e.stopPropagation(); closeLightbox(); }}
+                style={{ position: 'absolute', top: 10, right: 10, zIndex: 3, background: 'rgba(0,0,0,0.5)', border: 'none', color: '#fff', borderRadius: '50%', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                aria-label="Затвори"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
               {/* Arrows always on image */}
               <button
                 onClick={e => { e.stopPropagation(); prev(); }}
