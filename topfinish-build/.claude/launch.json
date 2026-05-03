@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "topfinish",
+      "runtimeExecutable": "/Users/ana-mariyaboteva/Desktop/topfinish-site/topfinish-build/node_modules/.bin/vite",
+      "runtimeArgs": ["--port", "5180"],
+      "cwd": "/Users/ana-mariyaboteva/Desktop/topfinish-site/topfinish-build",
+      "port": 5180
+    }
+  ]
+}
