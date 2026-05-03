@@ -47,10 +47,11 @@ export default function D7Partner() {
 
         {/* Text */}
         <div>
-          <div style={{ display:'inline-block', background: ORANGE, color:'#fff', padding:'4px 14px', borderRadius:50, fontFamily:FH, fontSize:12, fontWeight:700, letterSpacing:'0.15em', textTransform:'uppercase', marginBottom:20 }}>За нас</div>
-          <h2 style={{ fontFamily:FH, fontSize:'clamp(30px,3.2vw,48px)', fontWeight:800, color: NAVY, lineHeight:1, marginBottom:20, textTransform:'uppercase' }}>
+          <span className="d7-label">За нас</span>
+          <h2 className="d7-section-title">
             Вашият надежден<br/>партньор за ремонт
           </h2>
+          <div className="d7-divider" style={{ margin:'12px 0' }} />
           <p style={{ fontFamily:FH, fontSize:18, color: GRAY, lineHeight:1.8, marginBottom:32 }}>
             Повече от 12 години TopFinish Build е синоним на прецизност, надеждност и безупречно качество. Всеки обект е нов стандарт за нас.
           </p>

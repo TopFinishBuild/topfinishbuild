@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { useSwipe } from '../../hooks/useSwipe';
 import D7ProjectCard from './D7ProjectCard';
 
 const CATS = ['Всички', 'Бани', 'Кухни', 'Тераси', 'Спални', 'Хол'];
@@ -36,15 +37,18 @@ export default function D7Projects({ onViewAll }: D7ProjectsProps) {
 
   useEffect(() => { setSlide(0); }, [tab, perSlide]);
 
+  const swipe = useSwipe(
+    () => setSlide(s => Math.min(totalSlides - 1, s + 1)),
+    () => setSlide(s => Math.max(0, s - 1))
+  );
+
   return (
     <section id="projects" className="d7-projects">
       <div className="d7-container">
         <div className="d7-projects__header">
-          <div className="d7-projects__kicker">
-            <div className="d7-projects__dash" />
-            <span>Портфолио</span>
-          </div>
+          <span className="d7-label">Портфолио</span>
           <h2 className="d7-section-title">НАШИТЕ <em>ПРОЕКТИ</em></h2>
+          <div className="d7-divider" />
         </div>
 
         <div className="d7-projects__filters">
@@ -67,7 +71,7 @@ export default function D7Projects({ onViewAll }: D7ProjectsProps) {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
           )}
-          <div className="d7-projects-carousel__viewport">
+          <div className="d7-projects-carousel__viewport" {...swipe}>
             <div className="d7-projects-carousel__track"
               style={{ transform: `translateX(-${slide * 100}%)` }}>
               {grouped.map((group, si) => (

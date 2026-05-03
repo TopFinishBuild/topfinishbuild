@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import D7ServiceCard from './D7ServiceCard';
+import { useSwipe } from '../../hooks/useSwipe';
 
 const SERVICES = [
   { icon: 'bath',   title: 'Баня / WC',        desc: 'Пълна реновация на бани — плочки, санитария, ВиК, шпакловка и бои.' },
@@ -27,11 +28,12 @@ function MobileCarousel() {
 
   const advance = (d: number) => { setActive(a => wrap(a + d, N)); resetTimer(); };
   const goTo = (i: number) => { setActive(i); resetTimer(); };
+  const swipe = useSwipe(() => advance(1), () => advance(-1));
 
   return (
     <>
       {/* 3-D Coverflow — всички картички са в DOM за плавна анимация и в двете посоки */}
-      <div style={{ position:'relative', perspective:'1200px', height:320, display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', margin:'0 auto', maxWidth:900 }}>
+      <div style={{ position:'relative', perspective:'1200px', height:320, display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', margin:'0 auto', maxWidth:900 }} {...swipe}>
         {SERVICES.map((s, i) => {
           let pos = wrap(i - active, N);
           if (pos > N / 2) pos -= N;
@@ -106,17 +108,18 @@ export default function D7Services() {
   }, []);
 
   return (
-    <section id="d7-services" className="d7-services">
+    <section id="services" className="d7-services">
       <div className="d7-container">
 
         <div className="d7-services__header">
           <div>
-            <div style={{ display:'inline-block', background:'#f07420', color:'#fff', padding:'4px 14px', borderRadius:50, fontFamily:"'Manrope',sans-serif", fontSize:12, fontWeight:700, letterSpacing:'0.15em', textTransform:'uppercase', marginBottom:16 }}>Услуги</div>
-            <h2 style={{ fontFamily:"'Manrope',sans-serif", fontSize:'clamp(30px,3.2vw,48px)', fontWeight:800, color:'#0f1f3d', lineHeight:1 }}>
-              ВСИЧКО ЗА<br/>ВАШИЯ <span style={{ background:'#f07420', color:'#fff', padding:'0 6px' }}>РЕМОНТ</span>
+            <span className="d7-label">Услуги</span>
+            <h2 className="d7-section-title">
+              ВСИЧКО ЗА<br/>ВАШИЯ <em>РЕМОНТ</em>
             </h2>
+            <div className="d7-divider" style={{ margin:'12px 0' }} />
           </div>
-          <a href="#d7-team-busy" style={{ fontFamily:"'Manrope',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:'#0f1f3d', borderBottom:'2px solid #f07420', paddingBottom:4, whiteSpace:'nowrap' }}>
+          <a href="#calendar" style={{ fontFamily:"'Manrope',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:'#0f1f3d', borderBottom:'2px solid #f07420', paddingBottom:4, whiteSpace:'nowrap' }}>
             Заявете оферта →
           </a>
         </div>

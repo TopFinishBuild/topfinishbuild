@@ -47,17 +47,16 @@ export default function D7TeamBusy() {
   };
 
   return (
-    <section id="d7-team-busy" style={{ padding:'100px 0', background: NAVY }}>
+    <section id="calendar" style={{ padding:'100px 0', background: NAVY }}>
       <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 48px', boxSizing:'border-box' }}>
 
         {/* Header */}
         <div style={{ textAlign:'center', marginBottom:56 }}>
-          <div style={{ display:'inline-block', background:ORANGE, color:WHITE, padding:'4px 14px', borderRadius:50, fontFamily:FH, fontSize:12, fontWeight:700, letterSpacing:'0.15em', textTransform:'uppercase', marginBottom:16 }}>
-            График
-          </div>
-          <h2 style={{ fontFamily:FH, fontSize:'clamp(30px,3.2vw,48px)', fontWeight:800, color:WHITE, lineHeight:1.05, textTransform:'uppercase', marginBottom:12 }}>
+          <span className="d7-label">График</span>
+          <h2 className="d7-section-title" style={{ color: WHITE }}>
             Заетост на екипа
           </h2>
+          <div className="d7-divider" />
           <p style={{ fontFamily:FB, fontSize:18, color:'rgba(255,255,255,0.75)' }}>
             Проверете свободните дати и резервирайте своя слот навреме.
           </p>

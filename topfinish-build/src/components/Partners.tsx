@@ -5,9 +5,9 @@ export default function Partners() {
     <section id="partners" style={{ padding: '5rem 0', background: '#fff' }}>
       <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1.5rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-          <span className="section-label">Сътрудничество</span>
-          <h2 className="section-title">Нашите Партньори</h2>
-          <div className="divider"  style={{margin: "20px auto"}}/>
+          <span className="d7-label">Сътрудничество</span>
+          <h2 className="d7-section-title">Нашите <em>Партньори</em></h2>
+          <div className="d7-divider" />
           <p style={{ color: '#6b7280', fontSize: '1.0625rem', marginTop: '0.875rem' }}>Работим само с най-добрите в бранша</p>
         </div>
 

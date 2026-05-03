@@ -498,11 +498,11 @@ img { max-width: 100%; display: block; }
 }
 .cal-day-header {
   font-family: 'Barlow', sans-serif;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #9ca3af;
+  color: #6b7280;
   text-align: center;
   padding: 0.5rem 0;
 }
@@ -524,7 +524,7 @@ img { max-width: 100%; display: block; }
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.0625rem;
   font-weight: 700;
-  color: #9ca3af;
+  color: #6b7280;
   line-height: 1;
 }
 .cal-cell.busy .day-num { color: #ea580c; }
@@ -571,6 +571,7 @@ img { max-width: 100%; display: block; }
   gap: 1.5rem;
   width: max-content;
   animation: marquee 24s linear infinite;
+  padding: 10px;
 }
 .partners-track:hover {
   animation-play-state: paused;
@@ -686,7 +687,7 @@ img { max-width: 100%; display: block; }
 
   /* Calendar cells & headers */
   .cal-day-header {
-    font-size: 0.5rem;
+    font-size: 0.625rem;
     letter-spacing: 0;
     padding: 0.375rem 0;
   }
@@ -696,7 +697,7 @@ img { max-width: 100%; display: block; }
     border-radius: 0.375rem;
   }
   .cal-cell .day-num {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
   }
   .cal-dot {
     width: 3px;

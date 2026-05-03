@@ -1,6 +1,32 @@
 const SERVICES_LINKS = ['Баня / WC', 'Настилки', 'Боядисване', 'ВиК Инсталации', 'Електро Работи', 'Гипсокартон'];
 const NAV_LINKS      = ['За нас', 'Услуги', 'Преди/След', 'Клиенти', 'Контакт'];
 
+const IconFacebook = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+  </svg>
+);
+
+const IconInstagram = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+  </svg>
+);
+
+const IconTiktok = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.28 6.28 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/>
+  </svg>
+);
+
+const SOCIALS = [
+  { label: 'Facebook',  Icon: IconFacebook,  href: '#' },
+  { label: 'Instagram', Icon: IconInstagram, href: '#' },
+  { label: 'TikTok',    Icon: IconTiktok,    href: '#' },
+];
+
 export default function D7Footer() {
   return (
     <footer className="d7-footer">
@@ -11,30 +37,38 @@ export default function D7Footer() {
           {/* Brand column */}
           <div>
             <div className="d7-footer__logo">
-              <div className="d7-footer__logo-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M6 9L12 4.5L18 9V18H6V9Z" fill="white" opacity="0.9"/>
-                  <rect x="9" y="12" width="6" height="6" fill="white"/>
-                </svg>
-              </div>
-              <span className="d7-footer__brand">TopFinish Build</span>
+              <img src="/logos/topfinish-build-logo-light.png" alt="TopFinish Build" />
             </div>
             <p className="d7-footer__tagline">
               Повече от 12 години трансформираме пространства с прецизност и безупречно качество. Вашият надежден партньор за всякакъв вид ремонти.
             </p>
-            <div style={{ display: 'flex', gap: 12 }}>
-              {['facebook', 'instagram'].map((s) => (
-                <a key={s} href="#" style={{
-                  width: 36, height: 36,
-                  borderRadius: 6,
-                  background: 'rgba(255,255,255,0.08)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'rgba(255,255,255,0.5)',
-                  fontFamily: 'var(--d7-fh)', fontSize: 11, fontWeight: 700,
-                  textTransform: 'uppercase', letterSpacing: '0.05em',
-                  transition: 'background 0.2s',
-                }}>
-                  {s[0].toUpperCase()}
+            <div style={{ display: 'flex', gap: 10 }}>
+              {SOCIALS.map(({ label, Icon, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  style={{
+                    width: 40, height: 40,
+                    borderRadius: 8,
+                    background: 'rgba(255,255,255,0.09)',
+                    border: '1px solid rgba(255,255,255,0.14)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'rgba(255,255,255,0.75)',
+                    transition: 'background 0.2s, color 0.2s, border-color 0.2s',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--d7-orange)';
+                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--d7-orange)';
+                    (e.currentTarget as HTMLElement).style.color = '#fff';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.09)';
+                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.14)';
+                    (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.75)';
+                  }}
+                >
+                  <Icon />
                 </a>
               ))}
             </div>
@@ -55,7 +89,7 @@ export default function D7Footer() {
             <div className="d7-footer__col-title">Услуги</div>
             <ul className="d7-footer__links">
               {SERVICES_LINKS.map((l) => (
-                <li key={l}><a href="#d7-services">{l}</a></li>
+                <li key={l}><a href="#services">{l}</a></li>
               ))}
             </ul>
           </div>

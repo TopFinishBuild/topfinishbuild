@@ -5,7 +5,7 @@ export const partners = [
   { name: 'Bosch',   logo: '/logos/bosch.png'   },
   { name: 'Knauf',   logo: '/logos/knauf.png'   },
   { name: 'Ceresit', logo: '/logos/ceresit.png' },
-  { name: 'Dulux',   logo: '/logos/dulux.png'   },
+  { name: 'Dulux',   logo: '/logos/dulux.jpeg'   },
   { name: 'Weber',   logo: '/logos/weber.png'   },
 ];
 

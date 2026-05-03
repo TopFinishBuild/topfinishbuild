@@ -25,7 +25,7 @@ export default function D7BeforeAfter() {
   }, [dragging]);
 
   return (
-    <section id="d7-before-after" className="d7-before-after">
+    <section id="before-after" className="d7-before-after">
       <div className="d7-container">
 
         <div className="d7-before-after__header">

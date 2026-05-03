@@ -1,17 +1,8 @@
-interface D7PricingPageProps {
-  onBack: () => void;
-}
-
-export default function D7PricingPage({ onBack }: D7PricingPageProps) {
+export default function D7PricingPage() {
   return (
     <div className="d7-pricing-page">
-      {/* Hero strip — navy, with back button */}
       <div className="d7-page-hero">
         <div className="d7-container">
-          <button className="d7-page-hero__back" onClick={onBack}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            Назад
-          </button>
           <span className="d7-label" style={{ marginTop: 16, display: 'inline-block' }}>Цени</span>
           <h1 className="d7-section-title" style={{ color: '#fff', marginTop: 10 }}>
             ОЧАКВАЙТЕ <em>СКОРО</em>
@@ -19,7 +10,6 @@ export default function D7PricingPage({ onBack }: D7PricingPageProps) {
         </div>
       </div>
 
-      {/* Content — light */}
       <div className="d7-pricing-page__content">
         <div className="d7-container">
           <div className="d7-pricing-page__card">
@@ -40,7 +30,7 @@ export default function D7PricingPage({ onBack }: D7PricingPageProps) {
                 </svg>
                 +359 888 000 123
               </a>
-              <a href="#contact" onClick={onBack} className="d7-btn-primary">
+              <a href="#contact" className="d7-btn-primary">
                 Заявете оферта
               </a>
             </div>

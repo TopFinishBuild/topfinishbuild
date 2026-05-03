@@ -547,14 +547,14 @@
   .d7-testimonials__grid { display: none; }
 }
 
-/* анимация при смяна на картичката */
-@keyframes d7-card-slide-in {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* slide анимации за testimonials carousel */
+@keyframes d7-slide-from-right {
+  from { transform: translateX(100%); opacity: 0.6; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
-@keyframes d7-card-fade-in {
-  from { opacity: 0; transform: scale(0.96); }
-  to   { opacity: 1; transform: scale(1); }
+@keyframes d7-slide-from-left {
+  from { transform: translateX(-100%); opacity: 0.6; }
+  to   { transform: translateX(0);     opacity: 1; }
 }
 
 /* карусел контролер (само мобилно) */
@@ -624,7 +624,13 @@
   font-size: 17px;
   color: var(--d7-gray);
   line-height: 1.75;
-  flex: 1;
+  /* Reserve exactly 6 lines so short reviews don't shrink the card */
+  min-height: calc(17px * 1.75 * 6);
+  /* Clamp long reviews to 6 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .d7-testimonial-card__author {
@@ -1000,17 +1006,18 @@
 
 .d7-footer__tagline {
   font-family: var(--d7-fb);
-  font-size: 14px;
-  color: rgba(255,255,255,0.65);
-  line-height: 1.7;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.80);
+  line-height: 1.75;
   margin-bottom: 24px;
 }
 
 .d7-footer__col-title {
   font-family: var(--d7-fh);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--d7-orange);
   margin-bottom: 20px;
@@ -1025,8 +1032,9 @@
 
 .d7-footer__links a {
   font-family: var(--d7-fb);
-  font-size: 14px;
-  color: rgba(255,255,255,0.7);
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.82);
   transition: color 0.2s;
 }
 .d7-footer__links a:hover { color: var(--d7-orange); }
@@ -1036,9 +1044,10 @@
   align-items: center;
   gap: 10px;
   font-family: var(--d7-fb);
-  font-size: 14px;
-  color: rgba(255,255,255,0.7);
-  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.82);
+  margin-bottom: 12px;
 }
 
 .d7-footer__bottom {
@@ -1109,7 +1118,7 @@
 
 .d7-projects .d7-section-title { color: var(--d7-white); }
 
-.d7-projects__header { margin-bottom: 28px; }
+.d7-projects__header { margin-bottom: 28px; text-align: center; }
 
 .d7-projects__kicker {
   display: inline-flex;
