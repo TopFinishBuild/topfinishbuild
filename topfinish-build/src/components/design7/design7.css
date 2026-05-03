@@ -1094,6 +1094,17 @@
   .d7-root .hero-content { padding: 4rem 20px; }
 }
 
+/* ── TeamBusy inner container ── */
+.d7-team-busy__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  .d7-team-busy__inner { padding: 0 20px; }
+}
+
 /* ── TeamBusy responsive grid ── */
 .d7-team-busy__panels {
   display: grid;
@@ -1179,6 +1190,9 @@
   gap: 12px;
 }
 .d7-projects__grid--mobile { grid-template-columns: 1fr; }
+@media (max-width: 767px) {
+  .d7-projects__grid { grid-template-columns: 1fr; }
+}
 
 /* CTA "Виж всички" */
 .d7-projects__cta {

@@ -48,7 +48,7 @@ export default function D7TeamBusy() {
 
   return (
     <section id="calendar" style={{ padding:'100px 0', background: NAVY }}>
-      <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 48px', boxSizing:'border-box' }}>
+      <div className="d7-team-busy__inner">
 
         {/* Header */}
         <div style={{ textAlign:'center', marginBottom:56 }}>
@@ -112,6 +112,7 @@ export default function D7TeamBusy() {
                 border: 'none',
                 cursor: 'pointer',
                 width: '100%',
+                whiteSpace: 'nowrap',
               }}>
                 Изпрати Запитване
               </button>

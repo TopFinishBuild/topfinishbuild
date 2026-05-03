@@ -68,7 +68,7 @@ export default function D7Partner() {
               </div>
             ))}
           </div>
-          <a href="#d7-team-busy"
+          <a href="#calendar"
             style={{ background: hover ? ORANGE_DK : ORANGE, color:'#fff', padding:'14px 32px', fontFamily:FH, fontWeight:700, fontSize:15, letterSpacing:'0.08em', textTransform:'uppercase', borderRadius:50, display:'inline-block', transition:'all 0.2s' }}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}>

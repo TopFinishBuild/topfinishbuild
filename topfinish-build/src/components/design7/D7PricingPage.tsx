@@ -1,4 +1,8 @@
-export default function D7PricingPage() {
+interface D7PricingPageProps {
+  onNavigate: (href: string) => void;
+}
+
+export default function D7PricingPage({ onNavigate }: D7PricingPageProps) {
   return (
     <div className="d7-pricing-page">
       <div className="d7-page-hero">
@@ -30,9 +34,9 @@ export default function D7PricingPage() {
                 </svg>
                 +359 888 000 123
               </a>
-              <a href="#contact" className="d7-btn-primary">
+              <button onClick={() => onNavigate('#calendar')} className="d7-btn-primary" style={{ border: 'none', cursor: 'pointer' }}>
                 Заявете оферта
-              </a>
+              </button>
             </div>
           </div>
         </div>

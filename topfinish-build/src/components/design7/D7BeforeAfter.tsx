@@ -4,7 +4,9 @@ import { beforeImage, afterImage } from '../../data';
 export default function D7BeforeAfter() {
   const [sliderPos, setSliderPos] = useState(50);
   const [dragging,  setDragging]  = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const wrapRef    = useRef<HTMLDivElement>(null);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const touchLocked = useRef<'h' | 'v' | null>(null); // h=horizontal, v=vertical
 
   const calcPos = (clientX: number) => {
     if (!wrapRef.current) return;
@@ -12,10 +14,11 @@ export default function D7BeforeAfter() {
     setSliderPos(Math.min(100, Math.max(0, (clientX - r.left) / r.width * 100)));
   };
 
+  // Mouse drag
   useEffect(() => {
     if (!dragging) return;
-    const onMove  = (e: MouseEvent) => calcPos(e.clientX);
-    const onUp    = () => setDragging(false);
+    const onMove = (e: MouseEvent) => calcPos(e.clientX);
+    const onUp   = () => setDragging(false);
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup',   onUp);
     return () => {
@@ -23,6 +26,46 @@ export default function D7BeforeAfter() {
       window.removeEventListener('mouseup',   onUp);
     };
   }, [dragging]);
+
+  // Touch — non-passive so we can preventDefault for horizontal locks
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+
+    const onStart = (e: TouchEvent) => {
+      touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      touchLocked.current = null;
+    };
+
+    const onMove = (e: TouchEvent) => {
+      if (!touchStart.current) return;
+      const dx = Math.abs(e.touches[0].clientX - touchStart.current.x);
+      const dy = Math.abs(e.touches[0].clientY - touchStart.current.y);
+
+      if (!touchLocked.current) {
+        touchLocked.current = dx > dy ? 'h' : 'v';
+      }
+
+      if (touchLocked.current === 'h') {
+        e.preventDefault(); // block vertical scroll
+        calcPos(e.touches[0].clientX);
+      }
+    };
+
+    const onEnd = () => {
+      touchStart.current = null;
+      touchLocked.current = null;
+    };
+
+    el.addEventListener('touchstart', onStart, { passive: true });
+    el.addEventListener('touchmove',  onMove,  { passive: false });
+    el.addEventListener('touchend',   onEnd,   { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onStart);
+      el.removeEventListener('touchmove',  onMove);
+      el.removeEventListener('touchend',   onEnd);
+    };
+  }, []);
 
   return (
     <section id="before-after" className="d7-before-after">
@@ -41,7 +84,6 @@ export default function D7BeforeAfter() {
           ref={wrapRef}
           className="d7-before-after__slider"
           onMouseDown={(e) => { e.preventDefault(); setDragging(true); }}
-          onTouchMove={(e) => calcPos(e.touches[0].clientX)}
         >
           {/* After image (full width, behind) */}
           <img

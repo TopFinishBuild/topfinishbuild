@@ -30,7 +30,11 @@ const ITEMS: GalleryItem[] = [
   { cat: 'Кухни',  label: 'Кухня — остров',          src: 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Акрилни фасади, плот от компакт HPL, смесители Blanco', duration: '20 дни' },
 ];
 
-export default function D7GalleryPage() {
+interface D7GalleryPageProps {
+  onNavigate: (href: string) => void;
+}
+
+export default function D7GalleryPage({ onNavigate }: D7GalleryPageProps) {
   const [tab, setTab] = useState('Всички');
   const [lightbox, setLightbox] = useState<number | null>(null);
   const isMobile = useIsMobile();
@@ -187,9 +191,9 @@ export default function D7GalleryPage() {
                   <p style={{ fontFamily: 'Manrope,sans-serif', fontSize: isMobile ? 15 : 17, fontWeight: 800, color: '#0f1f3d', margin: 0 }}>{current.duration}</p>
                 </div>
               </div>
-              <a href="#contact" onClick={closeLightbox} style={{ marginTop: 'auto', display: 'block', background: '#f07420', color: '#fff', fontFamily: 'Manrope,sans-serif', fontSize: isMobile ? 13 : 14, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: isMobile ? '11px 20px' : '13px 24px', borderRadius: 6, textAlign: 'center', textDecoration: 'none' }}>
+              <button onClick={() => { closeLightbox(); onNavigate('#calendar'); }} style={{ marginTop: 'auto', display: 'block', width: '100%', background: '#f07420', color: '#fff', fontFamily: 'Manrope,sans-serif', fontSize: isMobile ? 13 : 14, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: isMobile ? '11px 20px' : '13px 24px', borderRadius: 6, textAlign: 'center', border: 'none', cursor: 'pointer' }}>
                 Заявете подобен проект
-              </a>
+              </button>
             </div>
           </div>
         </div>

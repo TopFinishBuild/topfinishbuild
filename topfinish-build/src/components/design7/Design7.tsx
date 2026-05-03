@@ -55,18 +55,20 @@ export default function Design7() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [page]);
 
+  // Scroll to top whenever page changes
+  useEffect(() => { window.scrollTo(0, 0); }, [page]);
+
   const navigate = (href: string) => {
     if (href === '#prices') {
-      setPage('pricing'); window.scrollTo(0, 0);
+      setPage('pricing');
     } else if (href === '#gallery') {
-      setPage('gallery'); window.scrollTo(0, 0);
+      setPage('gallery');
     } else if (href === '#home') {
-      setPage('home'); window.scrollTo(0, 0);
+      setPage('home');
     } else {
       if (page !== 'home') {
         pendingAnchor.current = href;
         setPage('home');
-        window.scrollTo(0, 0);
       } else {
         const el = document.querySelector(href);
         if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -78,9 +80,9 @@ export default function Design7() {
     <div className="d7-root">
       <Header onNavigate={navigate} activePage={page} activeSection={activeSection} />
       {page === 'pricing' ? (
-        <D7PricingPage />
+        <D7PricingPage onNavigate={navigate} />
       ) : page === 'gallery' ? (
-        <D7GalleryPage />
+        <D7GalleryPage onNavigate={navigate} />
       ) : (
         <>
           <Hero />
