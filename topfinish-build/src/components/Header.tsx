@@ -28,11 +28,11 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
 
   return (
     <header style={{ background: '#fff', borderBottom: '1px solid #f1f5f9', boxShadow: '0 1px 8px rgba(0,0,0,0.06)', position: 'sticky', top: 0, zIndex: 40, isolation: 'isolate' }}>
-      <nav style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '5rem' }}>
+      <nav style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '4rem' }}>
 
         {/* Logo */}
         <div style={{ cursor: 'pointer' }} onClick={e => handleLink(e as any, '#home')}>
-          <img src="/logos/topfinish-build-logo.png" alt="TopFinish Build" style={{ height: '3.5rem', width: 'auto', display: 'block' }} />
+          <img src="/logos/topfinish-build-logo.png" alt="TopFinish Build" style={{ height: '3rem', width: 'auto', display: 'block' }} />
         </div>
 
         {/* Desktop nav */}
