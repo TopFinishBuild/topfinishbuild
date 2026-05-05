@@ -1,5 +1,13 @@
+import React from 'react';
+
 const SERVICES_LINKS = ['Баня / WC', 'Настилки', 'Боядисване', 'ВиК Инсталации', 'Електро Работи', 'Гипсокартон'];
-const NAV_LINKS      = ['За нас', 'Услуги', 'Преди/След', 'Клиенти', 'Контакт'];
+const NAV_LINKS: [string, string][] = [
+  ['За нас',    '#about'],
+  ['Услуги',    '#services'],
+  ['Преди/След','#before-after'],
+  ['Галерия',   '#gallery'],
+  ['Контакт',   '#calendar'],
+];
 
 const IconFacebook = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -27,7 +35,10 @@ const SOCIALS = [
   { label: 'TikTok',    Icon: IconTiktok,    href: '#' },
 ];
 
-export default function D7Footer() {
+interface D7FooterProps { onNavigate?: (href: string) => void; }
+
+export default function D7Footer({ onNavigate }: D7FooterProps = {}) {
+  const handleClick = (e: React.MouseEvent, href: string) => { e.preventDefault(); onNavigate?.(href); };
   return (
     <footer className="d7-footer">
       <div className="d7-container">
@@ -78,8 +89,8 @@ export default function D7Footer() {
           <div>
             <div className="d7-footer__col-title">Навигация</div>
             <ul className="d7-footer__links">
-              {NAV_LINKS.map((l) => (
-                <li key={l}><a href="#">{l}</a></li>
+              {NAV_LINKS.map(([label, href]) => (
+                <li key={href}><a href={href} onClick={e => handleClick(e, href)}>{label}</a></li>
               ))}
             </ul>
           </div>

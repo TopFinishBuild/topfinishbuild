@@ -4,7 +4,7 @@ import './design7.css';
 const STATS = [
   { target: 350, suffix: '+', label: 'Завършени обекта' },
   { target: 12,  suffix: '',  label: 'Години опит' },
-  { target: 3,   suffix: 'г.',label: 'Гаранция' },
+  // { target: 3,   suffix: 'г.',label: 'Гаранция' },
   { target: 100, suffix: '%', label: 'Доволни клиенти' },
 ];
 

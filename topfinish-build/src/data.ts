@@ -56,4 +56,5 @@ export const NAV_LINKS: [string, string][] = [
   ['#calendar',     'Календар'],
   ['#partners',     'Партньори'],
   ['#prices',       'Цени'],
+  ['#about',        'За нас'],
 ];

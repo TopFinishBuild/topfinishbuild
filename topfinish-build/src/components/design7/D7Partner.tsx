@@ -12,7 +12,7 @@ const FH = "'Manrope',sans-serif";
 const PATHS: Record<string,string> = {
   wrench:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
   zap:   '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
-  award: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>',
+  home:  '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
 };
 
 function Ic({ name }: { name: string }) {
@@ -22,10 +22,14 @@ function Ic({ name }: { name: string }) {
 const FEATS = [
   ['wrench','Технически опит','Сертифицирани майстори с дългогодишен опит'],
   ['zap','Аварийни ремонти','Бързо реагиране при спешни случаи'],
-  ['award','Гаранция','3 години гаранция за всеки завършен обект'],
+  ['home','Интериорен дизайн','Работим с интериорен дизайнер — можем да препоръчаме'],
 ];
 
-export default function D7Partner() {
+interface D7PartnerProps {
+  onNavigate?: (href: string) => void;
+}
+
+export default function D7Partner({ onNavigate }: D7PartnerProps = {}) {
   const [hover, setHover] = useState(false);
   const isMobile = useIsMobile();
   return (
@@ -53,7 +57,7 @@ export default function D7Partner() {
           </h2>
           <div className="d7-divider" style={{ margin:'12px 0' }} />
           <p style={{ fontFamily:FH, fontSize:18, color: GRAY, lineHeight:1.8, marginBottom:32 }}>
-            Повече от 12 години TopFinish Build е синоним на прецизност, надеждност и безупречно качество. Всеки обект е нов стандарт за нас.
+            Предоставяме цялостни ремонтни решения за домове, офиси и индустриални пространства. Всеки проект изпълняваме с прецизност, надеждност и безупречно качество.
           </p>
           <div style={{ display:'flex', flexDirection:'column', gap:16, marginBottom:36 }}>
             {FEATS.map(([ic,t,d]) => (
@@ -68,11 +72,12 @@ export default function D7Partner() {
               </div>
             ))}
           </div>
-          <a href="#calendar"
-            style={{ background: hover ? ORANGE_DK : ORANGE, color:'#fff', padding:'14px 32px', fontFamily:FH, fontWeight:700, fontSize:15, letterSpacing:'0.08em', textTransform:'uppercase', borderRadius:50, display:'inline-block', transition:'all 0.2s' }}
+          <a href="#about"
+            style={{ background: hover ? ORANGE_DK : ORANGE, color:'#fff', padding:'14px 32px', fontFamily:FH, fontWeight:700, fontSize:15, letterSpacing:'0.08em', textTransform:'uppercase', borderRadius:50, display:'inline-block', transition:'all 0.2s', cursor:'pointer' }}
             onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}>
-            Поискайте оферта →
+            onMouseLeave={() => setHover(false)}
+            onClick={e => { e.preventDefault(); onNavigate?.('#about'); }}>
+            Научете повече →
           </a>
         </div>
 

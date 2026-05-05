@@ -180,10 +180,6 @@ export default function D7GalleryPage({ onNavigate }: D7GalleryPageProps) {
                 <span style={{ display: 'inline-block', background: '#f07420', color: '#fff', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 12px', borderRadius: 50, fontFamily: 'Manrope,sans-serif', marginBottom: 8 }}>{current.cat}</span>
                 <h2 style={{ fontFamily: 'Manrope,sans-serif', fontSize: isMobile ? 17 : 22, fontWeight: 800, color: '#0f1f3d', lineHeight: 1.2, margin: 0 }}>{current.label}</h2>
               </div>
-              <div>
-                <p style={{ fontFamily: 'Manrope,sans-serif', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#4b5563', margin: '0 0 6px' }}>Материали</p>
-                <p style={{ fontFamily: 'Manrope,sans-serif', fontSize: isMobile ? 13 : 15, color: '#374151', lineHeight: 1.6, margin: 0 }}>{current.materials}</p>
-              </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f8fafc', borderRadius: 8, padding: '10px 14px' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f07420" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <div>

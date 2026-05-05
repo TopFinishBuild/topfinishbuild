@@ -20,6 +20,7 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
   const isActive = (href: string) => {
     if (href === '#prices'   && activePage === 'pricing') return true;
     if (href === '#gallery'  && activePage === 'gallery') return true;
+    if (href === '#about'    && activePage === 'about')   return true;
     if (activePage === 'home' && href === activeSection)  return true;
     return false;
   };

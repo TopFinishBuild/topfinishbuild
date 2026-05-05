@@ -12,10 +12,11 @@ import D7Footer       from './D7Footer';
 import D7Projects     from './D7Projects';
 import D7PricingPage  from './D7PricingPage';
 import D7GalleryPage  from './D7GalleryPage';
+import D7AboutPage    from './D7AboutPage';
 import Partners from '../Partners';
 import Header from '../Header';
 
-type Page = 'home' | 'pricing' | 'gallery';
+type Page = 'home' | 'pricing' | 'gallery' | 'about';
 
 const SECTION_IDS = ['#services', '#before-after', '#calendar', '#partners'];
 
@@ -38,7 +39,7 @@ export default function Design7() {
 
   // Track active section while on home page
   useEffect(() => {
-    if (page !== 'home') { setActiveSection(''); return; }
+    if (page !== 'home') { setActiveSection(page === 'about' ? '#about' : ''); return; }
 
     const onScroll = () => {
       const triggerY = window.scrollY + window.innerHeight * 0.35;
@@ -63,6 +64,8 @@ export default function Design7() {
       setPage('pricing');
     } else if (href === '#gallery') {
       setPage('gallery');
+    } else if (href === '#about') {
+      setPage('about');
     } else if (href === '#home') {
       setPage('home');
     } else {
@@ -83,11 +86,13 @@ export default function Design7() {
         <D7PricingPage onNavigate={navigate} />
       ) : page === 'gallery' ? (
         <D7GalleryPage onNavigate={navigate} />
+      ) : page === 'about' ? (
+        <D7AboutPage onNavigate={navigate} />
       ) : (
         <>
           <Hero />
           <D7StatsLine />
-          <D7Partner />
+          <D7Partner onNavigate={navigate} />
           <D7Services />
           <D7BeforeAfter />
           <D7Projects onViewAll={() => { setPage('gallery'); window.scrollTo(0, 0); }} />
@@ -96,7 +101,7 @@ export default function Design7() {
           <Partners />
         </>
       )}
-      <D7Footer />
+      <D7Footer onNavigate={navigate} />
     </div>
   );
 }
