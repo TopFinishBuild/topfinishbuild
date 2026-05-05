@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import './design7.css';
 
 const STATS = [
   { target: 350, suffix: '+', label: 'Завършени обекта' },
-  { target: 12,  suffix: '',  label: 'Години опит' },
+  { target: 12,  suffix: '',  label: 'Години опит', mobileLabel: 'Години\nОпит' },
   // { target: 3,   suffix: 'г.',label: 'Гаранция' },
   { target: 100, suffix: '%', label: 'Доволни клиенти' },
 ];
 
 export default function D7StatsLine() {
   const [counts, setCounts] = useState(STATS.map(() => 0));
+  const isMobile = useIsMobile();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function D7StatsLine() {
         {STATS.map((s, i) => (
           <div key={s.label} className="d7-statsline__item">
             <div className="d7-statsline__number">{counts[i]}{s.suffix}</div>
-            <div className="d7-statsline__label">{s.label}</div>
+            <div className="d7-statsline__label">{isMobile && 'mobileLabel' in s ? (s as any).mobileLabel : s.label}</div>
           </div>
         ))}
       </div>

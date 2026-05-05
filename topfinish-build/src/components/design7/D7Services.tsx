@@ -33,7 +33,7 @@ function MobileCarousel() {
   return (
     <>
       {/* 3-D Coverflow — всички картички са в DOM за плавна анимация и в двете посоки */}
-      <div style={{ position:'relative', perspective:'1200px', height:320, display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', margin:'0 auto', maxWidth:900 }} {...swipe}>
+      <div ref={swipe.ref} style={{ position:'relative', perspective:'1200px', height:320, display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', margin:'0 auto', maxWidth:900 }}>
         {SERVICES.map((s, i) => {
           let pos = wrap(i - active, N);
           if (pos > N / 2) pos -= N;

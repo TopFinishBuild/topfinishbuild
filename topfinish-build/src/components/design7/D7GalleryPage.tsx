@@ -104,7 +104,7 @@ export default function D7GalleryPage({ onNavigate }: D7GalleryPageProps) {
         <div
           style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(10,18,40,0.96)', display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'center', paddingTop: isMobile ? 'env(safe-area-inset-top, 8px)' : 0 }}
           onClick={closeLightbox}
-          {...swipe}
+          ref={swipe.ref}
         >
           {/* Modal — strictly fixed size, nothing inside can change it */}
           <div
@@ -137,7 +137,7 @@ export default function D7GalleryPage({ onNavigate }: D7GalleryPageProps) {
               {/* Close — inside image zone top-right */}
               <button
                 onClick={e => { e.stopPropagation(); closeLightbox(); }}
-                style={{ position: 'absolute', top: 10, right: 10, zIndex: 3, background: 'rgba(0,0,0,0.5)', border: 'none', color: '#fff', borderRadius: '50%', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                style={{ position: 'absolute', top: 12, right: 12, zIndex: 3, background: 'rgba(0,0,0,0.65)', border: '1.5px solid rgba(255,255,255,0.4)', color: '#fff', borderRadius: '50%', width: isMobile ? 36 : 44, height: isMobile ? 36 : 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                 aria-label="Затвори"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -170,7 +170,7 @@ export default function D7GalleryPage({ onNavigate }: D7GalleryPageProps) {
               width: isMobile ? '100%' : '35%',
               height: isMobile ? '52%' : '100%',
               background: '#fff',
-              padding: isMobile ? '14px 16px' : '40px 36px',
+              padding: isMobile ? '16px 16px 20px' : '40px 36px',
               overflowY: 'auto',
               display: 'flex',
               flexDirection: 'column',
@@ -187,7 +187,7 @@ export default function D7GalleryPage({ onNavigate }: D7GalleryPageProps) {
                   <p style={{ fontFamily: 'Manrope,sans-serif', fontSize: isMobile ? 15 : 17, fontWeight: 800, color: '#0f1f3d', margin: 0 }}>{current.duration}</p>
                 </div>
               </div>
-              <button onClick={() => { closeLightbox(); onNavigate('#calendar'); }} style={{ marginTop: 'auto', display: 'block', width: '100%', background: '#f07420', color: '#fff', fontFamily: 'Manrope,sans-serif', fontSize: isMobile ? 13 : 14, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: isMobile ? '11px 20px' : '13px 24px', borderRadius: 6, textAlign: 'center', border: 'none', cursor: 'pointer' }}>
+              <button onClick={() => { closeLightbox(); onNavigate('#calendar'); }} style={{ marginTop: 'auto', display: 'block', width: '100%', background: '#f07420', color: '#fff', fontFamily: 'Manrope,sans-serif', fontSize: isMobile ? 13 : 14, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: isMobile ? '14px 20px' : '13px 24px', borderRadius: 6, textAlign: 'center', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
                 Заявете подобен проект
               </button>
             </div>

@@ -52,7 +52,7 @@ export default function D7Testimonials() {
 
         {/* Mobile — slide carousel */}
         <div className="d7-testimonials__carousel">
-          <div style={{ overflow: 'hidden', borderRadius: 12 }} {...swipe}>
+          <div ref={swipe.ref} style={{ overflow: 'hidden', borderRadius: 12 }}>
             <div
               key={`${idx}-${dir}`}
               style={{ animation: `${dir > 0 ? 'd7-slide-from-right' : 'd7-slide-from-left'} 0.32s ease` }}
