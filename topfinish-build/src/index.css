@@ -38,26 +38,14 @@ img { max-width: 100%; display: block; }
   display: flex;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .nav-desktop {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 2rem;
   }
   .nav-mobile-btn {
     display: none;
-  }
-}
-
-@media (min-width: 1024px) {
-  .nav-desktop {
-    gap: 2rem;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  .nav-link {
-    font-size: 0.8125rem;
   }
 }
 
@@ -83,7 +71,7 @@ img { max-width: 100%; display: block; }
   transform: translateY(0);
   pointer-events: auto;
 }
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .header-mobile-menu { display: none !important; }
 }
 
