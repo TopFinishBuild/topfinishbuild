@@ -11,7 +11,7 @@ os.getcwd = _safe_getcwd
 
 import http.server, socketserver, sys
 
-DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'topfinish-build', 'dist')
+DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dist')
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 5180
 
 class Handler(http.server.SimpleHTTPRequestHandler):
