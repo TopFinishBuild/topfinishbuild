@@ -4,6 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "full-install": "concurrently --kill-others \"npm i\" \"cd server && npm i\"",
+    "start": "concurrently --kill-others \"npm run start-web\" \"npm run start-server\"",
+    "start-host": "concurrently --kill-others \"npm run start-web-host\" \"npm run start-server\"",
+    "start-server": "npm --prefix server run dev",
+    "start-web": "vite",
+    "start-web-host": "vite --host",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
@@ -32,6 +38,8 @@
     "tailwindcss": "^4.2.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
+    "concurrently": "^9.1.2",
+    "terser": "^5.46.1",
     "vite": "^8.0.10"
   }
 }
