@@ -1,5 +1,5 @@
-export const beforeImage = '/before.png';
-export const afterImage  = '/after.png';
+export const beforeImage = '/before.webp';
+export const afterImage  = '/after.webp';
 
 export const partners = [
   { name: 'Bosch',   logo: '/logos/bosch.png'   },

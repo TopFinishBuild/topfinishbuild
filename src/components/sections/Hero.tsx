@@ -1,9 +1,12 @@
 export default function Hero() {
   return (
     <section className="hero-section">
-      {/* Background image with reduced opacity */}
+      {/* Background image — WebP with PNG fallback, high priority for LCP */}
       <div className="hero-bg-img">
-        <img src="/hero.png" alt="" />
+        <picture>
+          <source srcSet="/hero.webp" type="image/webp" />
+          <img src="/hero.webp" alt="" fetchPriority="high" loading="eager" decoding="async" />
+        </picture>
       </div>
 
       {/* Dark gradient overlay */}
@@ -21,13 +24,13 @@ export default function Hero() {
         </div>
 
         <h1 className="hero-title">
-          TopFinish Build<br/>
+          TopFinish Build<br />
           {/* <span style={{ color: '#f97316' }}>За Вашия Дом</span> */}
           <span style={{ color: '#f97316' }}>Правилният избор</span>
         </h1>
 
         <p className="hero-subtitle">
-          Перфекционизъм във всеки детайл<br/>
+          Перфекционизъм във всеки детайл<br />
           {/* Качество, прецизност и внимание към детайла. */}
         </p>
 

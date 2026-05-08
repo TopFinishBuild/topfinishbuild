@@ -86,17 +86,13 @@ export default function BeforeAfter() {
           onMouseDown={(e) => { e.preventDefault(); setDragging(true); }}
         >
           {/* After image (full width, behind) */}
-          <img
-            src={afterImage} alt="След ремонт"
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+          <img src={afterImage} alt="След ремонт" loading="lazy" decoding="async"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
 
           {/* Before image (clipped) */}
           <div style={{ position: 'absolute', inset: 0, clipPath: `inset(0 ${100 - sliderPos}% 0 0)` }}>
-            <img
-              src={beforeImage} alt="Преди ремонт"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            <img src={beforeImage} alt="Преди ремонт" loading="lazy" decoding="async"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
 
           {/* Divider handle */}

@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "optimize-images": "node scripts/optimize-images.mjs",
     "full-install": "concurrently --kill-others \"npm i\" \"cd server && npm i\"",
     "start": "concurrently --kill-others \"npm run start-web\" \"npm run start-server\"",
     "start-host": "concurrently --kill-others \"npm run start-web-host\" \"npm run start-server\"",
@@ -16,7 +17,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "lucide-react": "^1.11.0",
+    "lucide-react": "^1.14.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   },
@@ -31,15 +32,16 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "babel-plugin-react-compiler": "^1.0.0",
+    "concurrently": "^9.1.2",
     "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.2.4",
+    "terser": "^5.46.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
-    "concurrently": "^9.1.2",
-    "terser": "^5.46.1",
     "vite": "^8.0.10"
   }
 }

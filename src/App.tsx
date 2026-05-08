@@ -1,20 +1,35 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
 import './styles/app.css';
 
-import Hero           from './components/sections/Hero';
-import StatsBar       from './components/sections/StatsBar';
-import AboutPreview   from './components/sections/AboutPreview';
-import Services       from './components/sections/Services';
-import BeforeAfter    from './components/sections/BeforeAfter';
-import Testimonials   from './components/sections/Testimonials';
-import TeamSchedule   from './components/sections/TeamSchedule';
-import Footer         from './components/layout/Footer';
-import Projects       from './components/sections/Projects';
-import PricingPage    from './components/pages/PricingPage';
-import GalleryPage    from './components/pages/GalleryPage';
-import AboutPage      from './components/pages/AboutPage';
-import Partners       from './components/sections/Partners';
-import Header         from './components/layout/Header';
+// Above-fold — eager (needed for LCP)
+import Hero     from './components/sections/Hero';
+import StatsBar from './components/sections/StatsBar';
+import Header   from './components/layout/Header';
+import Footer   from './components/layout/Footer';
+
+// Below-fold — lazy so they don't block the first paint (LCP)
+// Preloaded immediately after mount so chunks are ready before user scrolls
+const aboutPreviewImport = () => import('./components/sections/AboutPreview');
+const servicesImport     = () => import('./components/sections/Services');
+const beforeAfterImport  = () => import('./components/sections/BeforeAfter');
+const projectsImport     = () => import('./components/sections/Projects');
+const testimonialsImport = () => import('./components/sections/Testimonials');
+const teamScheduleImport = () => import('./components/sections/TeamSchedule');
+const partnersImport     = () => import('./components/sections/Partners');
+const pricingPageImport  = () => import('./components/pages/PricingPage');
+const galleryPageImport  = () => import('./components/pages/GalleryPage');
+const aboutPageImport    = () => import('./components/pages/AboutPage');
+
+const AboutPreview = lazy(aboutPreviewImport);
+const Services     = lazy(servicesImport);
+const BeforeAfter  = lazy(beforeAfterImport);
+const Projects     = lazy(projectsImport);
+const Testimonials = lazy(testimonialsImport);
+const TeamSchedule = lazy(teamScheduleImport);
+const Partners     = lazy(partnersImport);
+const PricingPage  = lazy(pricingPageImport);
+const GalleryPage  = lazy(galleryPageImport);
+const AboutPage    = lazy(aboutPageImport);
 
 type Page = 'home' | 'pricing' | 'gallery' | 'about';
 
@@ -22,6 +37,16 @@ const SECTION_IDS = ['#services', '#before-after', '#calendar', '#partners'];
 
 export default function App() {
   const [page, setPage] = useState<Page>('home');
+
+  // Kick off all below-fold chunk downloads right after first paint.
+  // By the time the user scrolls, the chunks are already cached — no pop-in jump.
+  useEffect(() => {
+    void Promise.all([
+      aboutPreviewImport(), servicesImport(), beforeAfterImport(),
+      projectsImport(), testimonialsImport(), teamScheduleImport(),
+      partnersImport(), pricingPageImport(), galleryPageImport(), aboutPageImport(),
+    ]);
+  }, []);
   // For non-home pages derive the active section from page directly
   const [scrollSection, setScrollSection] = useState('');
   const activeSection = useMemo(
@@ -88,22 +113,25 @@ export default function App() {
     <div className="app-root">
       <Header onNavigate={navigate} activePage={page} activeSection={activeSection} />
       {page === 'pricing' ? (
-        <PricingPage onNavigate={navigate} />
+        <Suspense fallback={null}><PricingPage onNavigate={navigate} /></Suspense>
       ) : page === 'gallery' ? (
-        <GalleryPage onNavigate={navigate} />
+        <Suspense fallback={null}><GalleryPage onNavigate={navigate} /></Suspense>
       ) : page === 'about' ? (
-        <AboutPage onNavigate={navigate} />
+        <Suspense fallback={null}><AboutPage onNavigate={navigate} /></Suspense>
       ) : (
         <>
+          {/* Hero + StatsBar are eager — never inside Suspense, no layout shift */}
           <Hero />
           <StatsBar />
-          <AboutPreview onNavigate={navigate} />
-          <Services />
-          <BeforeAfter />
-          <Projects onViewAll={() => { setPage('gallery'); window.scrollTo(0, 0); }} />
-          <Testimonials />
-          <TeamSchedule />
-          <Partners />
+          <Suspense fallback={<div style={{ minHeight: '400vh' }} />}>
+            <AboutPreview onNavigate={navigate} />
+            <Services />
+            <BeforeAfter />
+            <Projects onViewAll={() => { setPage('gallery'); window.scrollTo(0, 0); }} />
+            <Testimonials />
+            <TeamSchedule />
+            <Partners />
+          </Suspense>
         </>
       )}
       <Footer onNavigate={navigate} />
