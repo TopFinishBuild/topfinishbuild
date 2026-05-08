@@ -2,9 +2,9 @@ import { defineConfig, type UserConfig } from 'vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 
-const isProd = process.env.NODE_ENV === 'production'
-
-export default defineConfig((): UserConfig => ({
+export default defineConfig(({ mode }): UserConfig => {
+const isProd = mode === 'production'
+return ({
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] }),
@@ -36,4 +36,4 @@ export default defineConfig((): UserConfig => ({
       },
     },
   },
-}))
+})})

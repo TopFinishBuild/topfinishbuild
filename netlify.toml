@@ -4,6 +4,9 @@
   command = "npm run build && cd server && npm install"
   functions = "server/functions"
 
+[build.environment]
+  NODE_ENV = "development"
+
 [functions]
   node_bundler = "esbuild"
 
