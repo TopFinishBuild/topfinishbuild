@@ -2,10 +2,11 @@ import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
 import './styles/app.css';
 
 // Above-fold — eager (needed for LCP)
-import Hero     from './components/sections/Hero';
-import StatsBar from './components/sections/StatsBar';
-import Header   from './components/layout/Header';
-import Footer   from './components/layout/Footer';
+import Hero            from './components/sections/Hero';
+import StatsBar        from './components/sections/StatsBar';
+import Header          from './components/layout/Header';
+import Footer          from './components/layout/Footer';
+import SkeletonFallback from './components/sections/SkeletonFallback';
 
 // Below-fold — lazy so they don't block the first paint (LCP)
 // Preloaded immediately after mount so chunks are ready before user scrolls
@@ -123,7 +124,7 @@ export default function App() {
           {/* Hero + StatsBar are eager — never inside Suspense, no layout shift */}
           <Hero />
           <StatsBar />
-          <Suspense fallback={<div style={{ minHeight: '400vh' }} />}>
+          <Suspense fallback={<SkeletonFallback />}>
             <AboutPreview onNavigate={navigate} />
             <Services />
             <BeforeAfter />
