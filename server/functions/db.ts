@@ -1,4 +1,4 @@
-import { MongoClient, ServerApiVersion, type Db } from 'mongodb';
+import { MongoClient, type Db } from 'mongodb';
 
 // dotenv loaded in app.ts entry point
 
@@ -11,13 +11,7 @@ const getDatabase = (): Db => {
         if (!uri) {
             throw new Error('MONGODB_URI is not defined in environment variables');
         }
-        client = new MongoClient(uri, {
-            serverApi: {
-                version: ServerApiVersion.v1,
-                strict: false,
-                deprecationErrors: true,
-            },
-        });
+        client = new MongoClient(uri);
         database = client.db('topfinish');
     }
     return database;

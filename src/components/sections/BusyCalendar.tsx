@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { busyDates, MONTH_NAMES, DAY_NAMES } from '../../data';
+import { MONTH_NAMES, DAY_NAMES } from '../../data';
 
 function daysInMonth(y: number, m: number) { return new Date(y, m + 1, 0).getDate(); }
 function firstWeekday(y: number, m: number) { const d = new Date(y, m, 1).getDay(); return d === 0 ? 6 : d - 1; }
 
-interface Props { theme?: 'dark' | 'light'; fillHeight?: boolean; }
+interface Props { theme?: 'dark' | 'light'; fillHeight?: boolean; busyDates?: Set<string>; }
 
-export default function BusyCalendar({ theme = 'dark', fillHeight = false }: Props) {
+export default function BusyCalendar({ theme = 'dark', fillHeight = false, busyDates = new Set<string>() }: Props) {
   const [cal, setCal] = useState({ year: 2025, month: 4 });
   const { year, month } = cal;
   const totalDays = daysInMonth(year, month);

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
+import { prefetchCategories } from './api/categoryCache';
 import './styles/app.css';
 
 // Above-fold — eager (needed for LCP)
@@ -20,6 +21,7 @@ const partnersImport     = () => import('./components/sections/Partners');
 const pricingPageImport  = () => import('./components/pages/PricingPage');
 const galleryPageImport  = () => import('./components/pages/GalleryPage');
 const aboutPageImport    = () => import('./components/pages/AboutPage');
+const adminPageImport    = () => import('./components/pages/AdminPage');
 
 const AboutPreview = lazy(aboutPreviewImport);
 const Services     = lazy(servicesImport);
@@ -31,13 +33,16 @@ const Partners     = lazy(partnersImport);
 const PricingPage  = lazy(pricingPageImport);
 const GalleryPage  = lazy(galleryPageImport);
 const AboutPage    = lazy(aboutPageImport);
+const AdminPage    = lazy(adminPageImport);
 
-type Page = 'home' | 'pricing' | 'gallery' | 'about';
+type Page = 'home' | 'pricing' | 'gallery' | 'about' | 'admin';
 
 const SECTION_IDS = ['#services', '#before-after', '#calendar', '#partners'];
 
 export default function App() {
-  const [page, setPage] = useState<Page>('home');
+  const [page, setPage] = useState<Page>(() =>
+    window.location.pathname.startsWith('/admin') ? 'admin' : 'home'
+  );
 
   // Kick off all below-fold chunk downloads right after first paint.
   // By the time the user scrolls, the chunks are already cached — no pop-in jump.
@@ -47,6 +52,7 @@ export default function App() {
       projectsImport(), testimonialsImport(), teamScheduleImport(),
       partnersImport(), pricingPageImport(), galleryPageImport(), aboutPageImport(),
     ]);
+    prefetchCategories();
   }, []);
   // For non-home pages derive the active section from page directly
   const [scrollSection, setScrollSection] = useState('');
@@ -112,6 +118,9 @@ export default function App() {
 
   return (
     <div className="app-root">
+      {page === 'admin' ? (
+        <Suspense fallback={null}><AdminPage onNavigate={navigate} /></Suspense>
+      ) : (<>
       <Header onNavigate={navigate} activePage={page} activeSection={activeSection} />
       {page === 'pricing' ? (
         <Suspense fallback={null}><PricingPage onNavigate={navigate} /></Suspense>
@@ -136,6 +145,7 @@ export default function App() {
         </>
       )}
       <Footer onNavigate={navigate} />
+      </>)}
     </div>
   );
 }

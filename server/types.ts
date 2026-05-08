@@ -11,12 +11,14 @@ export interface ContactInquiry {
 
 export interface GalleryImage {
     _id?: string;
+    label: string;
+    category: string;     // 'Бани' | 'Кухни' | 'Тераси' | 'Спални' | 'Хол'
+    materials?: string;
+    duration?: string;
     key: string;
     keySmall?: string;
     url: string;
     urlSmall?: string;
-    title?: string;
-    category?: string;
     order?: number;
     createdAt: Date;
 }

@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react';
+
 const S = ({ w = '100%', h = 20, r = 8, mb = 0 }: { w?: string | number; h?: number; r?: number; mb?: number }) => (
   <div className="skel-block" style={{ width: w, height: h, borderRadius: r, marginBottom: mb }} />
 );
 
-const Section = ({ children, bg = '#fff' }: { children: React.ReactNode; bg?: string }) => (
+const Section = ({ children, bg = '#fff' }: { children: ReactNode; bg?: string }) => (
   <div style={{ background: bg, padding: '80px 0' }}>
     <div className="container">{children}</div>
   </div>

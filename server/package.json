@@ -6,7 +6,8 @@
     "main": "functions/app.ts",
     "scripts": {
         "start": "tsx ./functions/app.ts",
-        "dev": "tsx watch --env-file ../.env ./functions/app.ts"
+        "dev": "tsx watch --env-file ../.env ./functions/app.ts",
+        "seed-categories": "tsx --env-file ../.env ./scripts/seed-categories.ts"
     },
     "author": "",
     "license": "ISC",

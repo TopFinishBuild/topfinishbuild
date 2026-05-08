@@ -2,10 +2,6 @@ import dotenv from 'dotenv';
 import { resolve } from 'path';
 import { existsSync } from 'fs';
 
-// Load .env — try multiple locations to support different run contexts:
-// 1. ../  → when running via "npm --prefix server" (cwd = server/)
-// 2. ./  → when running from the project root
-// 3. Netlify Functions: env vars are injected by the platform, no .env needed
 const envPaths = [resolve(process.cwd(), '..', '.env'), resolve(process.cwd(), '.env')];
 const envPath = envPaths.find(p => existsSync(p));
 if (envPath) dotenv.config({ path: envPath });
@@ -14,6 +10,11 @@ import express from 'express';
 import cors from 'cors';
 import serverless from 'serverless-http';
 import { sendContactEmail } from './contact.js';
+import { login } from './user.js';
+import { listGallery, uploadGalleryImage, deleteGalleryImage } from './gallery.js';
+import { getCalendar, setCalendar } from './calendar.js';
+import { listCategories, addCategory, deleteCategory } from './categories.js';
+import { authorizeAdmin } from './auth.js';
 
 const app = express();
 
@@ -31,10 +32,26 @@ app.get('/api/health', (_req, res) => {
     res.status(200).json({ status: 'ok' });
 });
 
-// Contact / inquiry
+// Auth
+app.post('/api/auth/login', login);
+
+// Contact
 app.post('/api/contact/send', sendContactEmail);
 
-// Standalone mode — active when running directly with tsx
+// Categories — public read, admin write
+app.get('/api/categories', listCategories);
+app.post('/api/categories', authorizeAdmin, addCategory);
+app.delete('/api/categories/:id', authorizeAdmin, deleteCategory);
+
+// Gallery — public read, admin write
+app.get('/api/gallery', listGallery);
+app.post('/api/gallery', authorizeAdmin, uploadGalleryImage);
+app.delete('/api/gallery/:id', authorizeAdmin, deleteGalleryImage);
+
+// Calendar — public read, admin write
+app.get('/api/calendar', getCalendar);
+app.put('/api/calendar', authorizeAdmin, setCalendar);
+
 if (process.env.NODE_ENV !== 'production') {
     const PORT = Number(process.env.PORT) || 3000;
     app.listen(PORT, () => {

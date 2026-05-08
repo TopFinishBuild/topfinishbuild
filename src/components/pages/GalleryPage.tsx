@@ -2,44 +2,51 @@ import { useState, useEffect, useCallback } from 'react';
 import ProjectCard from '../sections/ProjectCard';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useSwipe } from '../../hooks/useSwipe';
+import { api } from '../../api/client';
+import { fetchCategories } from '../../api/categoryCache';
 
 interface GalleryItem {
+  _id?: string;
   cat: string;
   label: string;
   src: string;
-  materials: string;
-  duration: string;
+  srcFull?: string;
+  materials?: string;
+  duration?: string;
 }
-
-const CATS = ['Всички', 'Бани', 'Кухни', 'Тераси', 'Спални', 'Хол'];
-const ITEMS: GalleryItem[] = [
-  { cat: 'Бани', label: 'Луксозна баня', src: 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Испански плочки 60×60 Porcelanosa, смесители Hansgrohe, силикон Ceresit', duration: '12 дни' },
-  { cat: 'Кухни', label: 'Модерна кухня', src: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=600&h=450&q=80', materials: 'МДФ фасади, гранитна плоча, LED осветление Ikea, смесители Grohe', duration: '18 дни' },
-  { cat: 'Тераси', label: 'Тераса с настилка', src: 'https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Гранитогрес 60×60 Lasselsberger, фугиращ разтвор Ceresit, хидроизолация Knauf', duration: '8 дни' },
-  { cat: 'Спални', label: 'Спалня — гипсокартон', src: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Гипсокартон Knauf, финна шпакловка Vetonit, боя Dulux Velvet Touch', duration: '7 дни' },
-  { cat: 'Хол', label: 'Хол — цялостен ремонт', src: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Ламиниран паркет Swiss Krono, боя Dulux, корнизи от полистирол', duration: '14 дни' },
-  { cat: 'Бани', label: 'Баня — микроцимент', src: 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Микроцимент Topcret, импрегнатор Woca, смесители Roca', duration: '10 дни' },
-  { cat: 'Кухни', label: 'Кухня — окачен таван', src: 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Гипсокартон Knauf, профили Gyproc, LED лента Philips', duration: '5 дни' },
-  { cat: 'Тераси', label: 'Тераса — гранитогрес', src: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Gres Porcellanato 80×80, лепило Weber, силикон Ceresit CS 25', duration: '9 дни' },
-  { cat: 'Спални', label: 'Спалня — боя', src: 'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Шпакловка Knauf Multifinish, боя Dulux Ambiance, лак Teknos', duration: '4 дни' },
-  { cat: 'Хол', label: 'Хол — декоративна стена', src: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Декоративна мазилка Caparol, пигменти Colorex, грунд Ceresit CT 17', duration: '6 дни' },
-  { cat: 'Бани', label: 'Баня — черно-бяла', src: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Черни плочки 30×60 Aparici, бели плочки 60×60, месингов смесител Gessi', duration: '11 дни' },
-  { cat: 'Кухни', label: 'Кухня — плочки', src: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Метро плочки бяло 10×20, фугиращ разтвор Weber joint, епоксиден силикон', duration: '3 дни' },
-  { cat: 'Хол', label: 'Хол — паркет', src: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Дъбов паркет 14мм, лепило Bostik, лак Loba 2K WS', duration: '10 дни' },
-  { cat: 'Бани', label: 'Баня — мозайка', src: 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Стъклена мозайка 2.5×2.5 Ezarri, бяла фуга Mapei Ultracolor', duration: '8 дни' },
-  { cat: 'Кухни', label: 'Кухня — остров', src: 'https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=600&h=450&q=80', materials: 'Акрилни фасади, плот от компакт HPL, смесители Blanco', duration: '20 дни' },
-];
 
 interface GalleryPageProps {
   onNavigate: (href: string) => void;
 }
 
 export default function GalleryPage({ onNavigate }: GalleryPageProps) {
-  const [tab, setTab] = useState('Всички');
+  const [tab, setTab]         = useState('Всички');
+  const [cats, setCats]       = useState<string[]>(['Всички']);
   const [lightbox, setLightbox] = useState<number | null>(null);
+  const [allItems, setAllItems] = useState<GalleryItem[]>([]);
+  const [loading, setLoading]   = useState(true);
   const isMobile = useIsMobile();
 
-  const items = tab === 'Всички' ? ITEMS : ITEMS.filter(i => i.cat === tab);
+  useEffect(() => {
+    Promise.all([
+      fetchCategories(),
+      api.get<{ images: { _id: string; label: string; category: string; url: string; urlSmall?: string; materials?: string; duration?: string }[] }>('/gallery'),
+    ]).then(([cats, galleryRes]) => {
+      setCats(['Всички', ...cats.map(c => c.name)]);
+      setAllItems(galleryRes.images.map(img => ({
+        _id: img._id,
+        cat: img.category,
+        label: img.label,
+        src: img.urlSmall ?? img.url,
+        srcFull: img.url,
+        materials: img.materials,
+        duration: img.duration,
+      })));
+    }).catch(() => { /* leave empty */ })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const items = tab === 'Всички' ? allItems : allItems.filter(i => i.cat === tab);
 
   const openLightbox = (idx: number) => setLightbox(idx);
   const closeLightbox = () => setLightbox(null);
@@ -83,13 +90,15 @@ export default function GalleryPage({ onNavigate }: GalleryPageProps) {
       <div className="gallery-page__content">
         <div className="container">
           <div className="gallery-page__filters">
-            {CATS.map(c => (
+            {cats.map(c => (
               <button key={c}
                 className={`gallery-page__filter-btn${tab === c ? ' active' : ''}`}
                 onClick={() => setTab(c)}
               >{c}</button>
             ))}
           </div>
+          {loading && <p style={{ color: '#6b7280', padding: '40px 0' }}>Зареждане...</p>}
+          {!loading && items.length === 0 && <p style={{ color: '#6b7280', padding: '40px 0' }}>Няма снимки в тази категория.</p>}
           <div className={`projects__grid${isMobile ? ' projects__grid--mobile' : ''}`}>
             {items.map((it, i) => (
               <div key={`${tab}-${i}`} onClick={() => openLightbox(i)} style={{ cursor: 'pointer' }}>
@@ -131,7 +140,7 @@ export default function GalleryPage({ onNavigate }: GalleryPageProps) {
               overflow: 'hidden',
             }}>
               <img
-                src={current.src.replace('w=600&h=450', 'w=1400&h=1050')}
+                src={current.srcFull ?? current.src}
                 alt={current.label}
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
               />

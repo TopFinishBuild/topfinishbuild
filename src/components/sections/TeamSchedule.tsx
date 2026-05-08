@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BusyCalendar from '../sections/BusyCalendar';
+import { api } from '../../api/client';
 
 type Form = { name: string; email: string; phone: string; message: string };
 
@@ -10,7 +11,14 @@ const NAVY   = '#0f1f3d';
 const WHITE  = '#ffffff';
 
 export default function TeamSchedule() {
-  const [form, setForm] = useState<Form>({ name:'', email:'', phone:'', message:'' });
+  const [form, setForm]         = useState<Form>({ name:'', email:'', phone:'', message:'' });
+  const [busyDates, setBusyDates] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    api.get<{ dates: string[] }>('/calendar')
+      .then(res => setBusyDates(new Set(res.dates)))
+      .catch(() => { /* fallback to empty */ });
+  }, []);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +75,7 @@ export default function TeamSchedule() {
 
           {/* Calendar panel — light */}
           <div style={panel}>
-            <BusyCalendar theme="light" fillHeight />
+            <BusyCalendar theme="light" fillHeight busyDates={busyDates} />
           </div>
 
           {/* Form panel — light */}
