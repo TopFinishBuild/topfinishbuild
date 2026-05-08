@@ -52,7 +52,13 @@ export default function App() {
       projectsImport(), testimonialsImport(), teamScheduleImport(),
       partnersImport(), pricingPageImport(), galleryPageImport(), aboutPageImport(),
     ]);
-    prefetchCategories();
+    // defer until browser is idle — hero LCP paints first
+    const id = typeof requestIdleCallback !== 'undefined'
+      ? requestIdleCallback(prefetchCategories, { timeout: 2000 })
+      : setTimeout(prefetchCategories, 0) as unknown as number;
+    return () => {
+      typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback(id) : clearTimeout(id);
+    };
   }, []);
   // For non-home pages derive the active section from page directly
   const [scrollSection, setScrollSection] = useState('');
