@@ -51,7 +51,7 @@ export const DAY_NAMES   = ['ПН','ВТ','СР','ЧТ','ПТ','СБ','НД'];
 
 export const NAV_LINKS: [string, string][] = [
   ['#services',     'Услуги'],
-  ['#before-after', 'Преди/След'],
+  ['#predi-i-sled', 'Преди/След'],
   ['#gallery',      'Галерия'],
   ['#calendar',     'Календар'],
   ['#partners',     'Партньори'],

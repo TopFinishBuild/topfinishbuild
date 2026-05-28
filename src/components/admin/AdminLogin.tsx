@@ -31,7 +31,7 @@ export default function AdminLogin({ onLogin }: Props) {
             <div style={{ background: '#1e293b', borderRadius: 16, padding: '48px 40px', width: '100%', maxWidth: 420, boxShadow: '0 24px 60px rgba(0,0,0,0.5)' }}>
                 <div style={{ textAlign: 'center', marginBottom: 32 }}>
                     <img src="/logos/topfinish-build-logo.png" alt="TopFinish Build" style={{ height: 48, margin: '0 auto 16px', display: 'block' }} />
-                    <p style={{ color: '#94a3b8', fontSize: 14, margin: 0 }}>Администраторски панел</p>
+                    <p style={{ color: '#b0c4d5', fontSize: 14, margin: 0 }}>Администраторски панел</p>
                 </div>
 
                 <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

@@ -12,13 +12,59 @@ export interface ContactInquiry {
 export interface GalleryImage {
     _id?: string;
     label: string;
-    category: string;     // 'Бани' | 'Кухни' | 'Тераси' | 'Спални' | 'Хол'
-    materials?: string;
+    category: string;
     duration?: string;
+    city?: string;
+    area?: string;
     key: string;
     keySmall?: string;
     url: string;
     urlSmall?: string;
+    order?: number;
+    deleted?: boolean;
+    createdAt: Date;
+}
+
+export interface Category {
+    _id: string;
+    name: string;
+    order?: number;
+    createdAt: Date;
+}
+
+export interface Partner {
+    _id?: string;
+    name: string;
+    key: string;
+    keySmall?: string;
+    url: string;
+    urlSmall?: string;
+    order?: number;
+    createdAt: Date;
+}
+
+export interface Testimonial {
+    _id?: string;
+    text: string;
+    name: string;
+    subtitle: string;
+    initials: string;
+    stars?: number;
+    order?: number;
+    createdAt: Date;
+}
+
+export interface BeforeAfterPair {
+    _id?: string;
+    title: string;
+    beforeKey: string;
+    beforeKeySmall?: string;
+    beforeUrl: string;
+    beforeUrlSmall?: string;
+    afterKey: string;
+    afterKeySmall?: string;
+    afterUrl: string;
+    afterUrlSmall?: string;
     order?: number;
     createdAt: Date;
 }

@@ -6,9 +6,10 @@ interface HeaderProps {
   onNavigate?: (href: string) => void;
   activePage?: string;
   activeSection?: string;
+  calendarVisible?: boolean;
 }
 
-export default function Header({ onNavigate, activePage = 'home', activeSection = '' }: HeaderProps) {
+export default function Header({ onNavigate, activePage = 'home', activeSection = '', calendarVisible = true }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLink = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -18,10 +19,12 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
   };
 
   const isActive = (href: string) => {
-    if (href === '#prices' && activePage === 'pricing') return true;
-    if (href === '#gallery' && activePage === 'gallery') return true;
-    if (href === '#about' && activePage === 'about') return true;
-    if (activePage === 'home' && href === activeSection) return true;
+    if (href === '#prices'       && activePage === 'pricing')     return true;
+    if (href === '#gallery'      && activePage === 'gallery')     return true;
+    if (href === '#about'        && activePage === 'about')       return true;
+    if (href === '#calendar'     && activePage === 'calendar')    return true;
+    if (href === '#predi-i-sled' && activePage === 'beforeafter') return true;
+    if (activePage === 'home' && href === activeSection)    return true;
     return false;
   };
 
@@ -38,7 +41,7 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
 
         {/* Desktop nav */}
         <div className="nav-desktop">
-          {NAV_LINKS.map(([href, label]) => {
+          {NAV_LINKS.filter(([href]) => href !== '#calendar' || calendarVisible).map(([href, label]) => {
             const active = isActive(href);
             return (
               <a
@@ -80,7 +83,7 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
       {/* Mobile menu */}
       <div className={`header-mobile-menu${menuOpen ? ' header-mobile-menu--open' : ''}`} role="navigation" aria-label="Мобилно меню">
         <div style={{ padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {NAV_LINKS.map(([href, label]) => {
+          {NAV_LINKS.filter(([href]) => href !== '#calendar' || calendarVisible).map(([href, label]) => {
             const active = isActive(href);
             return (
               <a

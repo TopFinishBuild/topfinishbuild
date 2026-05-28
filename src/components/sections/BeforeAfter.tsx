@@ -1,132 +1,66 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { beforeImage, afterImage } from '../../data';
+import BeforeAfterSlider from './BeforeAfterSlider';
+import { api } from '../../api/client';
 
-export default function BeforeAfter() {
-  const [sliderPos, setSliderPos] = useState(50);
-  const [dragging,  setDragging]  = useState(false);
-  const wrapRef    = useRef<HTMLDivElement>(null);
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const touchLocked = useRef<'h' | 'v' | null>(null); // h=horizontal, v=vertical
+interface Pair {
+    _id: string;
+    title: string;
+    beforeUrl: string;
+    afterUrl: string;
+}
 
-  const calcPos = (clientX: number) => {
-    if (!wrapRef.current) return;
-    const r = wrapRef.current.getBoundingClientRect();
-    setSliderPos(Math.min(100, Math.max(0, (clientX - r.left) / r.width * 100)));
-  };
+interface Props {
+    onNavigate: (href: string) => void;
+}
 
-  // Mouse drag
-  useEffect(() => {
-    if (!dragging) return;
-    const onMove = (e: MouseEvent) => calcPos(e.clientX);
-    const onUp   = () => setDragging(false);
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup',   onUp);
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup',   onUp);
-    };
-  }, [dragging]);
+export default function BeforeAfter({ onNavigate }: Props) {
+    const [pair, setPair] = useState<Pair | null>(null);
 
-  // Touch — non-passive so we can preventDefault for horizontal locks
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return;
+    useEffect(() => {
+        api.get<{ pairs: Pair[] }>('/beforeafter')
+            .then(res => { if (res.pairs.length > 0) setPair(res.pairs[0]); })
+            .catch(() => {});
+    }, []);
 
-    const onStart = (e: TouchEvent) => {
-      touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      touchLocked.current = null;
-    };
+    const beforeUrl = pair?.beforeUrl ?? beforeImage;
+    const afterUrl  = pair?.afterUrl  ?? afterImage;
 
-    const onMove = (e: TouchEvent) => {
-      if (!touchStart.current) return;
-      const dx = Math.abs(e.touches[0].clientX - touchStart.current.x);
-      const dy = Math.abs(e.touches[0].clientY - touchStart.current.y);
+    return (
+        <section id="before-after" className="before-after">
+            <div className="container">
 
-      if (!touchLocked.current) {
-        touchLocked.current = dx > dy ? 'h' : 'v';
-      }
+                <div className="before-after__header">
+                    <span className="section-label">Нашата работа</span>
+                    <h2 className="section-title">Преди и След</h2>
+                    <div className="divider" />
+                    <p style={{ fontFamily: 'var(--d7-fb)', fontSize: 16, color: 'var(--d7-gray)', marginTop: 8 }}>
+                        {pair?.title ?? 'Вижте трансформацията с ваши очи'}
+                    </p>
+                </div>
 
-      if (touchLocked.current === 'h') {
-        e.preventDefault(); // block vertical scroll
-        calcPos(e.touches[0].clientX);
-      }
-    };
+                <BeforeAfterSlider beforeUrl={beforeUrl} afterUrl={afterUrl} />
 
-    const onEnd = () => {
-      touchStart.current = null;
-      touchLocked.current = null;
-    };
+                <p className="before-after__hint">Плъзнете наляво и надясно за да видите разликата</p>
 
-    el.addEventListener('touchstart', onStart, { passive: true });
-    el.addEventListener('touchmove',  onMove,  { passive: false });
-    el.addEventListener('touchend',   onEnd,   { passive: true });
-    return () => {
-      el.removeEventListener('touchstart', onStart);
-      el.removeEventListener('touchmove',  onMove);
-      el.removeEventListener('touchend',   onEnd);
-    };
-  }, []);
+                <div style={{ textAlign: 'center', marginTop: 40 }}>
+                    <button
+                        onClick={() => onNavigate('#predi-i-sled')}
+                        style={{
+                            background: '#f97316', color: '#fff', border: 'none',
+                            borderRadius: 8, padding: '13px 36px', fontSize: 15, fontWeight: 700,
+                            cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10,
+                            boxShadow: '0 4px 16px rgba(249,115,22,0.3)',
+                        }}
+                    >
+                        Вижте всички трансформации
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </button>
+                </div>
 
-  return (
-    <section id="before-after" className="before-after">
-      <div className="container">
-
-        <div className="before-after__header">
-          <span className="section-label">Нашата работа</span>
-          <h2 className="section-title">Преди и След</h2>
-          <div className="divider" />
-          <p style={{ fontFamily: 'var(--d7-fb)', fontSize: 16, color: 'var(--d7-gray)', marginTop: 8 }}>
-            Вижте трансформацията с ваши очи
-          </p>
-        </div>
-
-        <div
-          ref={wrapRef}
-          className="before-after__slider"
-          onMouseDown={(e) => { e.preventDefault(); setDragging(true); }}
-        >
-          {/* After image (full width, behind) */}
-          <img src={afterImage} alt="След ремонт" loading="lazy" decoding="async"
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-
-          {/* Before image (clipped) */}
-          <div style={{ position: 'absolute', inset: 0, clipPath: `inset(0 ${100 - sliderPos}% 0 0)` }}>
-            <img src={beforeImage} alt="Преди ремонт" loading="lazy" decoding="async"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-
-          {/* Divider handle */}
-          <div style={{
-            position: 'absolute', top: 0, bottom: 0,
-            left: `${sliderPos}%`,
-            width: 3,
-            background: 'white',
-            transform: 'translateX(-50%)',
-            boxShadow: '0 0 10px rgba(0,0,0,0.3)',
-          }}>
-            <div style={{
-              position: 'absolute', top: '50%', left: '50%',
-              transform: 'translate(-50%,-50%)',
-              width: 44, height: 44,
-              background: 'white',
-              borderRadius: '50%',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <svg width="20" height="16" viewBox="0 0 22 18" fill="none"
-                stroke="#f07420" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="8 15 3 9 8 3"/><polyline points="14 15 19 9 14 3"/>
-              </svg>
             </div>
-          </div>
-
-          <span className="before-after__label before-after__label--before">ПРЕДИ</span>
-          <span className="before-after__label before-after__label--after">СЛЕД</span>
-        </div>
-
-        <p className="before-after__hint">Плъзнете наляво и надясно за да видите разликата</p>
-
-      </div>
-    </section>
-  );
+        </section>
+    );
 }

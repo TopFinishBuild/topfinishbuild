@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../api/client';
+import { fetchSettings, updateSettingsCache } from '../../api/settingsCache';
 import { MONTH_NAMES, DAY_NAMES } from '../../data';
 
 function daysInMonth(y: number, m: number) { return new Date(y, m + 1, 0).getDate(); }
@@ -10,15 +11,34 @@ export default function CalendarManager() {
     const [cal, setCal]             = useState(() => { const n = new Date(); return { year: n.getFullYear(), month: n.getMonth() }; });
     const [loading, setLoading]     = useState(true);
     const [saving, setSaving]       = useState(false);
+    const [toggling, setToggling]   = useState(false);
     const [msg, setMsg]             = useState('');
     const [visible, setVisible]     = useState(true);
 
     useEffect(() => {
-        api.get<{ dates: string[] }>('/calendar')
-            .then(res => setBusyDates(new Set(res.dates)))
-            .catch(() => setMsg('Грешка при зареждане'))
-            .finally(() => setLoading(false));
+        Promise.all([
+            api.get<{ dates: string[] }>('/calendar'),
+            fetchSettings(),
+        ]).then(([cal, settings]) => {
+            setBusyDates(new Set(cal.dates));
+            setVisible(settings.calendarVisible);
+        }).catch(() => setMsg('Грешка при зареждане'))
+          .finally(() => setLoading(false));
     }, []);
+
+    const toggleVisibility = async () => {
+        setToggling(true);
+        const next = !visible;
+        try {
+            await api.put('/settings', { calendarVisible: next });
+            updateSettingsCache({ calendarVisible: next });
+            setVisible(next);
+        } catch (err) {
+            setMsg(err instanceof Error ? err.message : 'Грешка');
+        } finally {
+            setToggling(false);
+        }
+    };
 
     const { year, month } = cal;
     const totalDays = daysInMonth(year, month);
@@ -63,8 +83,9 @@ export default function CalendarManager() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <h2 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, margin: 0 }}>Календар — Заети дни</h2>
                     <button
-                        onClick={() => setVisible(v => !v)}
-                        style={{ display: 'flex', alignItems: 'center', gap: 6, background: visible ? 'rgba(249,115,22,0.15)' : '#1e293b', border: `1px solid ${visible ? 'rgba(249,115,22,0.4)' : '#334155'}`, borderRadius: 6, padding: '5px 12px', color: visible ? '#fb923c' : '#64748b', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                        onClick={() => void toggleVisibility()}
+                        disabled={toggling}
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, background: visible ? 'rgba(249,115,22,0.15)' : '#1e293b', border: `1px solid ${visible ? 'rgba(249,115,22,0.4)' : '#334155'}`, borderRadius: 6, padding: '5px 12px', color: visible ? '#fb923c' : '#8fa4b8', fontSize: 12, fontWeight: 600, cursor: toggling ? 'not-allowed' : 'pointer', opacity: toggling ? 0.6 : 1 }}
                     >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             {visible
@@ -84,14 +105,14 @@ export default function CalendarManager() {
             </div>
 
             {!visible && (
-                <div style={{ background: '#1e293b', borderRadius: 12, padding: '20px 24px', color: '#64748b', fontSize: 14 }}>
+                <div style={{ background: '#1e293b', borderRadius: 12, padding: '20px 24px', color: '#8fa4b8', fontSize: 14 }}>
                     Календарът е скрит — натисни "Покажи" за да редактираш заетите дни.
                 </div>
             )}
 
             <div style={{ display: visible ? 'block' : 'none', background: '#1e293b', borderRadius: 16, padding: 28, maxWidth: 480 }}>
                 {loading ? (
-                    <div style={{ color: '#64748b', fontSize: 14 }}>Зареждане...</div>
+                    <div style={{ color: '#8fa4b8', fontSize: 14 }}>Зареждане...</div>
                 ) : (
                     <>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
@@ -104,7 +125,7 @@ export default function CalendarManager() {
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', marginBottom: 6 }}>
                             {DAY_NAMES.map((d: string) => (
-                                <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', color: '#64748b', padding: '4px 0' }}>{d}</div>
+                                <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', color: '#8fa4b8', padding: '4px 0' }}>{d}</div>
                             ))}
                         </div>
 
@@ -131,7 +152,7 @@ export default function CalendarManager() {
                                             userSelect: 'none',
                                         }}
                                     >
-                                        <span style={{ fontSize: 15, fontWeight: 700, color: busy ? '#fb923c' : '#94a3b8', lineHeight: 1 }}>{day}</span>
+                                        <span style={{ fontSize: 15, fontWeight: 700, color: busy ? '#fb923c' : '#b0c4d5', lineHeight: 1 }}>{day}</span>
                                         <span style={{ width: 5, height: 5, borderRadius: '50%', marginTop: 3, background: busy ? '#f97316' : '#334155', display: 'block' }} />
                                     </div>
                                 );
@@ -140,12 +161,12 @@ export default function CalendarManager() {
 
                         <div style={{ display: 'flex', gap: 20, marginTop: 16, paddingTop: 14, borderTop: '1px solid #1e3a5f' }}>
                             {([['Зает', true], ['Свободен', false]] as const).map(([label, busy]) => (
-                                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#94a3b8' }}>
+                                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#b0c4d5' }}>
                                     <span style={{ width: 14, height: 14, borderRadius: 3, display: 'inline-block', background: busy ? 'rgba(249,115,22,0.4)' : '#0f172a', border: `1.5px solid ${busy ? '#f97316' : '#334155'}` }} />
                                     {label}
                                 </div>
                             ))}
-                            <span style={{ marginLeft: 'auto', fontSize: 12, color: '#475569' }}>Клик за превключване</span>
+                            <span style={{ marginLeft: 'auto', fontSize: 12, color: '#7b93a8' }}>Клик за превключване</span>
                         </div>
                     </>
                 )}

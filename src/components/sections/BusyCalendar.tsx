@@ -7,7 +7,7 @@ function firstWeekday(y: number, m: number) { const d = new Date(y, m, 1).getDay
 interface Props { theme?: 'dark' | 'light'; fillHeight?: boolean; busyDates?: Set<string>; }
 
 export default function BusyCalendar({ theme = 'dark', fillHeight = false, busyDates = new Set<string>() }: Props) {
-  const [cal, setCal] = useState({ year: 2025, month: 4 });
+  const [cal, setCal] = useState(() => { const n = new Date(); return { year: n.getFullYear(), month: n.getMonth() }; });
   const { year, month } = cal;
   const totalDays = daysInMonth(year, month);
   const startDay  = firstWeekday(year, month);

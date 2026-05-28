@@ -4,6 +4,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { useSwipe } from '../../hooks/useSwipe';
 import { api } from '../../api/client';
 import { fetchCategories } from '../../api/categoryCache';
+import { toSlug } from '../../utils/slug';
 
 interface GalleryItem {
   _id?: string;
@@ -11,17 +12,20 @@ interface GalleryItem {
   label: string;
   src: string;
   srcFull?: string;
-  materials?: string;
   duration?: string;
+  city?: string;
+  area?: string;
+  slug: string;
 }
 
 interface GalleryPageProps {
   onNavigate: (href: string) => void;
+  initialSlug?: string;
 }
 
-export default function GalleryPage({ onNavigate }: GalleryPageProps) {
-  const [tab, setTab]         = useState('Всички');
-  const [cats, setCats]       = useState<string[]>(['Всички']);
+export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProps) {
+  const [tab, setTab]           = useState('Всички');
+  const [cats, setCats]         = useState<string[]>(['Всички']);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [allItems, setAllItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -31,35 +35,55 @@ export default function GalleryPage({ onNavigate }: GalleryPageProps) {
     Promise.all([
       fetchCategories(),
       api.get<{ images: { _id: string; label: string; category: string; url: string; urlSmall?: string; materials?: string; duration?: string }[] }>('/gallery'),
-    ]).then(([cats, galleryRes]) => {
-      setCats(['Всички', ...cats.map(c => c.name)]);
-      setAllItems(galleryRes.images.map(img => ({
+    ]).then(([catsData, galleryRes]) => {
+      setCats(['Всички', ...catsData.map(c => c.name)]);
+      const mapped = galleryRes.images.map(img => ({
         _id: img._id,
         cat: img.category,
         label: img.label,
         src: img.urlSmall ?? img.url,
         srcFull: img.url,
-        materials: img.materials,
-        duration: img.duration,
-      })));
+        duration: (img as any).duration,
+        city: (img as any).city,
+        area: (img as any).area,
+        slug: toSlug(img.label),
+      }));
+      setAllItems(mapped);
+
+      // Open lightbox if initialSlug matches
+      if (initialSlug) {
+        const idx = mapped.findIndex(i => i.slug === initialSlug);
+        if (idx !== -1) setLightbox(idx);
+      }
     }).catch(() => { /* leave empty */ })
       .finally(() => setLoading(false));
   }, []);
 
   const items = tab === 'Всички' ? allItems : allItems.filter(i => i.cat === tab);
 
-  const openLightbox = (idx: number) => setLightbox(idx);
-  const closeLightbox = () => setLightbox(null);
+  const openLightbox = (idx: number) => {
+    setLightbox(idx);
+    history.pushState(null, '', `/galeria/${items[idx].slug}`);
+  };
+
+  const closeLightbox = () => {
+    setLightbox(null);
+    history.pushState(null, '', '/galeria');
+  };
 
   const prev = useCallback(() => {
     if (lightbox === null) return;
-    setLightbox((lightbox - 1 + items.length) % items.length);
-  }, [lightbox, items.length]);
+    const next = (lightbox - 1 + items.length) % items.length;
+    setLightbox(next);
+    history.replaceState(null, '', `/galeria/${items[next].slug}`);
+  }, [lightbox, items]);
 
   const next = useCallback(() => {
     if (lightbox === null) return;
-    setLightbox((lightbox + 1) % items.length);
-  }, [lightbox, items.length]);
+    const nxt = (lightbox + 1) % items.length;
+    setLightbox(nxt);
+    history.replaceState(null, '', `/galeria/${items[nxt].slug}`);
+  }, [lightbox, items]);
 
   useEffect(() => {
     if (lightbox === null) return;
@@ -116,7 +140,6 @@ export default function GalleryPage({ onNavigate }: GalleryPageProps) {
           onClick={closeLightbox}
           ref={swipeSetNode}
         >
-          {/* Modal — strictly fixed size, nothing inside can change it */}
           <div
             onClick={e => e.stopPropagation()}
             style={{
@@ -129,22 +152,13 @@ export default function GalleryPage({ onNavigate }: GalleryPageProps) {
               boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
             }}
           >
-            {/* Image zone — fixed 62% height on mobile, 65% width on desktop */}
-            <div style={{
-              flexShrink: 0,
-              flexGrow: 0,
-              width: isMobile ? '100%' : '65%',
-              height: isMobile ? '49%' : '100%',
-              background: '#000',
-              position: 'relative',
-              overflow: 'hidden',
-            }}>
+            {/* Image zone */}
+            <div style={{ flexShrink: 0, flexGrow: 0, width: isMobile ? '100%' : '65%', height: isMobile ? '49%' : '100%', background: '#000', position: 'relative', overflow: 'hidden' }}>
               <img
                 src={current.srcFull ?? current.src}
                 alt={current.label}
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
               />
-              {/* Close — inside image zone top-right */}
               <button
                 onClick={e => { e.stopPropagation(); closeLightbox(); }}
                 style={{ position: 'absolute', top: 12, right: 12, zIndex: 3, background: 'rgba(0,0,0,0.65)', border: '1.5px solid rgba(255,255,255,0.4)', color: '#fff', borderRadius: '50%', width: isMobile ? 36 : 44, height: isMobile ? 36 : 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
@@ -152,7 +166,6 @@ export default function GalleryPage({ onNavigate }: GalleryPageProps) {
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
               </button>
-              {/* Arrows always on image */}
               <button
                 onClick={e => { e.stopPropagation(); prev(); }}
                 style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', borderRadius: 8, width: isMobile ? 40 : 48, height: isMobile ? 40 : 48, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 2 }}
@@ -167,35 +180,36 @@ export default function GalleryPage({ onNavigate }: GalleryPageProps) {
               >
                 <svg width={isMobile ? 18 : 22} height={isMobile ? 18 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
               </button>
-              {/* Counter on image */}
               <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: 12, fontFamily: 'Manrope,sans-serif', padding: '3px 12px', borderRadius: 20, whiteSpace: 'nowrap' }}>
                 {lightbox + 1} / {items.length}
               </div>
             </div>
 
-            {/* Info panel — fills remaining space, scrolls internally */}
-            <div style={{
-              flexShrink: 0,
-              flexGrow: 0,
-              width: isMobile ? '100%' : '35%',
-              height: isMobile ? '52%' : '100%',
-              background: '#fff',
-              padding: isMobile ? '16px 16px 20px' : '40px 36px',
-              overflowY: 'auto',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: isMobile ? 12 : 20,
-            }}>
+            {/* Info panel */}
+            <div style={{ flexShrink: 0, flexGrow: 0, width: isMobile ? '100%' : '35%', height: isMobile ? '52%' : '100%', background: '#fff', padding: isMobile ? '20px 18px 24px' : '44px 40px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: isMobile ? 20 : 28 }}>
               <div>
-                <span style={{ display: 'inline-block', background: '#f07420', color: '#fff', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 12px', borderRadius: 50, fontFamily: 'Manrope,sans-serif', marginBottom: 8 }}>{current.cat}</span>
-                <h2 style={{ fontFamily: 'Manrope,sans-serif', fontSize: isMobile ? 17 : 22, fontWeight: 800, color: '#0f1f3d', lineHeight: 1.2, margin: 0 }}>{current.label}</h2>
+                <span style={{ display: 'inline-block', background: '#f07420', color: '#fff', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 12px', borderRadius: 50, fontFamily: 'Manrope,sans-serif', marginBottom: 10 }}>{current.cat}</span>
+                <h2 style={{ fontFamily: 'Manrope,sans-serif', fontSize: isMobile ? 18 : 23, fontWeight: 800, color: '#0f1f3d', lineHeight: 1.25, margin: 0 }}>{current.label}</h2>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f8fafc', borderRadius: 8, padding: '10px 14px' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f07420" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                <div>
-                  <p style={{ fontFamily: 'Manrope,sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#4b5563', margin: 0 }}>Срок</p>
-                  <p style={{ fontFamily: 'Manrope,sans-serif', fontSize: isMobile ? 15 : 17, fontWeight: 800, color: '#0f1f3d', margin: 0 }}>{current.duration}</p>
-                </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
+                {current.area && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#f8fafc', border: '1px solid #e9eef4', borderRadius: 8, padding: '8px 14px' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f07420" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                    <span style={{ fontFamily: 'Manrope,sans-serif', fontSize: 14, fontWeight: 700, color: '#0f1f3d' }}>{current.area} кв.м.</span>
+                  </div>
+                )}
+                {current.city && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#f8fafc', border: '1px solid #e9eef4', borderRadius: 8, padding: '8px 14px' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f07420" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span style={{ fontFamily: 'Manrope,sans-serif', fontSize: 14, fontWeight: 700, color: '#0f1f3d' }}>{current.city}</span>
+                  </div>
+                )}
+                {current.duration && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#f8fafc', border: '1px solid #e9eef4', borderRadius: 8, padding: '8px 14px' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f07420" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span style={{ fontFamily: 'Manrope,sans-serif', fontSize: 14, fontWeight: 700, color: '#0f1f3d' }}>{current.duration} дни</span>
+                  </div>
+                )}
               </div>
               <button onClick={() => { closeLightbox(); onNavigate('#calendar'); }} style={{ marginTop: 'auto', display: 'block', width: '100%', background: '#f07420', color: '#fff', fontFamily: 'Manrope,sans-serif', fontSize: isMobile ? 13 : 14, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: isMobile ? '14px 20px' : '13px 24px', borderRadius: 6, textAlign: 'center', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
                 Заявете подобен проект
