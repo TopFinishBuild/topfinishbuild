@@ -1,10 +1,27 @@
+/* ── Google Fonts: Manrope (headings + body, един шрифт с широк weight range) ── */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
 /* ============================================================
    DESIGN 7 – TopFinish Build
    Всички стилове са с префикс .d7- за да няма конфликти
    ============================================================ */
 
-/* ── Google Fonts: Manrope (headings + body, един шрифт с широк weight range) ── */
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+/* ── Sticky footer layout ── */
+.app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+.app-root__content {
+  flex: 1;
+}
+
+/* ── Toast notifications ── */
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.app-toast { animation: toastSlideIn 0.25s ease forwards; }
 
 /* ── CSS variables ── */
 :root {
@@ -50,14 +67,16 @@
   background: var(--d7-orange);
   color: var(--d7-white);
   font-family: var(--d7-fh);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 4px 14px;
+  padding: 5px 14px;
   border-radius: 50px;
   margin-bottom: 16px;
 }
+/* Kill the decorative line from index.css that adds phantom left space */
+.section-label::before { display: none; }
 
 /* ── Section heading ── */
 .section-title {
@@ -84,8 +103,11 @@
 }
 
 /* ── Buttons ── */
+.btn-ghost { font-family: var(--d7-fh); font-size: 15px; }
+
 .btn-primary {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   background: var(--d7-orange);
   color: var(--d7-white);
   font-family: var(--d7-fh);
@@ -1497,17 +1519,18 @@
 }
 
 .project-card__label {
-  background: var(--d7-orange);
-  color: var(--d7-white);
-  padding: 6px 14px;
-  border-radius: 6px;
+  background: none;
+  color: #fff;
+  padding: 0;
+  border-radius: 0;
   font-family: var(--d7-fh);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.7);
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(6px);
   transition: all 0.3s ease;
 }
 
@@ -1517,11 +1540,29 @@
 }
 
 /* ============================================================
-   SHARED PAGE HERO STRIP  (used by gallery + pricing)
+   SHARED PAGE HERO STRIP  (used by all sub-pages)
    ============================================================ */
 .page-hero {
   background: var(--d7-navy);
-  padding: 32px 0 52px;
+  padding: 56px 0 64px;
+}
+.page-hero__inner {
+  text-align: center;
+}
+.page-hero__title {
+  color: var(--d7-white) !important;
+  margin-top: 12px;
+}
+.page-hero__divider {
+  margin: 16px auto 0 !important;
+}
+.page-hero__desc {
+  font-family: var(--d7-fb);
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 520px;
+  margin: 20px auto 0;
+  line-height: 1.75;
 }
 
 .page-hero__back {

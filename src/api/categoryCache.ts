@@ -1,6 +1,6 @@
 import { api } from './client';
 
-export interface Category { _id: string; name: string; }
+export interface Category { _id: string; name: string; order?: number; }
 
 let cache: Category[] | null = null;
 let inflight: Promise<Category[]> | null = null;

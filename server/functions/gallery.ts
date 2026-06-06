@@ -8,7 +8,7 @@ import type { GalleryImage } from '../types.js';
 export async function listGallery(_req: Request, res: Response): Promise<void> {
     try {
         const images = await MongoDB.collection('gallery')
-            .find({})
+            .find({ deleted: { $ne: true } })
             .sort({ order: 1, createdAt: -1 })
             .toArray();
         res.json({ images });
@@ -18,14 +18,28 @@ export async function listGallery(_req: Request, res: Response): Promise<void> {
     }
 }
 
+export async function listAdminGallery(_req: Request, res: Response): Promise<void> {
+    try {
+        const images = await MongoDB.collection('gallery')
+            .find({})
+            .sort({ order: 1, createdAt: -1 })
+            .toArray();
+        res.json({ images });
+    } catch (err) {
+        console.error('List admin gallery error:', err);
+        res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });
+    }
+}
+
 export async function uploadGalleryImage(req: Request, res: Response): Promise<void> {
     try {
-        const { file, label, category, materials, duration } = req.body as {
+        const { file, label, category, duration, city, area } = req.body as {
             file?: { base64: string; name: string; type: string };
             label?: string;
             category?: string;
-            materials?: string;
             duration?: string;
+            city?: string;
+            area?: string;
         };
 
         if (!file || !label || !category) {
@@ -35,16 +49,28 @@ export async function uploadGalleryImage(req: Request, res: Response): Promise<v
 
         const result = await uploadToS3WithVariants(file);
 
+        // Assign next order value
+        const last = await MongoDB.collection('gallery')
+            .find({})
+            .sort({ order: -1 })
+            .limit(1)
+            .toArray();
+        const nextOrder = last.length > 0 && (last[0] as any).order != null
+            ? (last[0] as any).order + 1
+            : 0;
+
         const image: GalleryImage & { _id: string } = {
             _id: uuidv4(),
             label,
             category,
-            materials: materials ?? '',
             duration: duration ?? '',
+            city: city ?? '',
+            area: area ?? '',
             key: result.key,
             keySmall: result.keySmall,
             url: result.url,
             urlSmall: result.urlSmall,
+            order: nextOrder,
             createdAt: new Date(),
         };
 
@@ -56,7 +82,36 @@ export async function uploadGalleryImage(req: Request, res: Response): Promise<v
     }
 }
 
-export async function deleteGalleryImage(req: Request, res: Response): Promise<void> {
+export async function softDeleteGalleryImage(req: Request, res: Response): Promise<void> {
+    try {
+        const { id } = req.params;
+        const filter = { _id: id } as unknown as Filter<Document>;
+        const image = await MongoDB.collection('gallery').findOne(filter);
+        if (!image) {
+            res.status(404).json({ error: 'Image not found' });
+            return;
+        }
+        await MongoDB.collection('gallery').updateOne(filter, { $set: { deleted: true } });
+        res.json({ ok: true });
+    } catch (err) {
+        console.error('Soft delete gallery error:', err);
+        res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });
+    }
+}
+
+export async function restoreGalleryImage(req: Request, res: Response): Promise<void> {
+    try {
+        const { id } = req.params;
+        const filter = { _id: id } as unknown as Filter<Document>;
+        await MongoDB.collection('gallery').updateOne(filter, { $unset: { deleted: '' } });
+        res.json({ ok: true });
+    } catch (err) {
+        console.error('Restore gallery error:', err);
+        res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });
+    }
+}
+
+export async function hardDeleteGalleryImage(req: Request, res: Response): Promise<void> {
     try {
         const { id } = req.params;
         const filter = { _id: id } as unknown as Filter<Document>;
@@ -75,7 +130,29 @@ export async function deleteGalleryImage(req: Request, res: Response): Promise<v
         await MongoDB.collection('gallery').deleteOne(filter);
         res.json({ ok: true });
     } catch (err) {
-        console.error('Delete gallery error:', err);
+        console.error('Hard delete gallery error:', err);
+        res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });
+    }
+}
+
+export async function reorderGallery(req: Request, res: Response): Promise<void> {
+    try {
+        const { items } = req.body as { items: Array<{ _id: string; order: number }> };
+        if (!Array.isArray(items)) {
+            res.status(400).json({ error: 'items array required' });
+            return;
+        }
+        await Promise.all(
+            items.map(item =>
+                MongoDB.collection('gallery').updateOne(
+                    { _id: item._id } as unknown as Filter<Document>,
+                    { $set: { order: item.order } }
+                )
+            )
+        );
+        res.json({ ok: true });
+    } catch (err) {
+        console.error('Reorder gallery error:', err);
         res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });
     }
 }

@@ -7,9 +7,9 @@ export async function listCategories(_req: Request, res: Response): Promise<void
     try {
         const cats = await MongoDB.collection('categories')
             .find({})
-            .sort({ createdAt: 1 })
+            .sort({ order: 1, createdAt: 1 })
             .toArray();
-        res.json({ categories: cats.map((c: any) => ({ _id: c._id, name: c.name })) });
+        res.json({ categories: cats.map((c: any) => ({ _id: c._id, name: c.name, order: c.order })) });
     } catch (err) {
         res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });
     }
@@ -27,9 +27,17 @@ export async function addCategory(req: Request, res: Response): Promise<void> {
             res.status(409).json({ error: 'Категорията вече съществува' });
             return;
         }
-        const doc = { _id: uuidv4(), name: name.trim(), createdAt: new Date() };
+        const last = await MongoDB.collection('categories')
+            .find({})
+            .sort({ order: -1 })
+            .limit(1)
+            .toArray();
+        const nextOrder = last.length > 0 && (last[0] as any).order != null
+            ? (last[0] as any).order + 1
+            : 0;
+        const doc = { _id: uuidv4(), name: name.trim(), order: nextOrder, createdAt: new Date() };
         await MongoDB.collection('categories').insertOne(doc as unknown as Document);
-        res.status(201).json({ category: { _id: doc._id, name: doc.name } });
+        res.status(201).json({ category: { _id: doc._id, name: doc.name, order: doc.order } });
     } catch (err) {
         res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });
     }
@@ -45,6 +53,55 @@ export async function deleteCategory(req: Request, res: Response): Promise<void>
             return;
         }
         await MongoDB.collection('categories').deleteOne(filter);
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });
+    }
+}
+
+export async function renameCategory(req: Request, res: Response): Promise<void> {
+    try {
+        const { id } = req.params;
+        const { name } = req.body as { name?: string };
+        if (!name?.trim()) { res.status(400).json({ error: 'name required' }); return; }
+
+        const filter = { _id: id } as unknown as Filter<Document>;
+        const cat = await MongoDB.collection('categories').findOne(filter);
+        if (!cat) { res.status(404).json({ error: 'Категорията не е намерена' }); return; }
+
+        const oldName = (cat as any).name as string;
+        const newName = name.trim();
+
+        // Rename category + migrate all gallery images in one transaction-like batch
+        await Promise.all([
+            MongoDB.collection('categories').updateOne(filter, { $set: { name: newName } }),
+            MongoDB.collection('gallery').updateMany(
+                { category: oldName } as unknown as Filter<Document>,
+                { $set: { category: newName } }
+            ),
+        ]);
+
+        res.json({ ok: true, oldName, newName });
+    } catch (err) {
+        res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });
+    }
+}
+
+export async function reorderCategories(req: Request, res: Response): Promise<void> {
+    try {
+        const { items } = req.body as { items: Array<{ _id: string; order: number }> };
+        if (!Array.isArray(items)) {
+            res.status(400).json({ error: 'items array required' });
+            return;
+        }
+        await Promise.all(
+            items.map(item =>
+                MongoDB.collection('categories').updateOne(
+                    { _id: item._id } as unknown as Filter<Document>,
+                    { $set: { order: item.order } }
+                )
+            )
+        );
         res.json({ ok: true });
     } catch (err) {
         res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });

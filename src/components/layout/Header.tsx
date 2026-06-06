@@ -18,10 +18,11 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
   };
 
   const isActive = (href: string) => {
-    if (href === '#prices' && activePage === 'pricing') return true;
-    if (href === '#gallery' && activePage === 'gallery') return true;
-    if (href === '#about' && activePage === 'about') return true;
-    if (activePage === 'home' && href === activeSection) return true;
+    if (href === '#prices'       && activePage === 'pricing')     return true;
+    if (href === '#gallery'      && activePage === 'gallery')     return true;
+    if (href === '#about'        && activePage === 'about')       return true;
+    if (href === '#predi-i-sled' && activePage === 'beforeafter') return true;
+    if (activePage === 'home'    && href === activeSection)       return true;
     return false;
   };
 
@@ -57,9 +58,9 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
             );
           })}
           <a
-            href="#contact"
+            href="#calendar"
             className="btn-primary"
-            onClick={e => handleLink(e, '#contact')}
+            onClick={e => handleLink(e, '#calendar')}
             style={{ padding: '0.6rem 1.5rem', fontSize: '0.9375rem' }}
           >
             Контакт
@@ -92,7 +93,7 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
               >{label}</a>
             );
           })}
-          <a href="#contact" onClick={e => handleLink(e, '#contact')} className="btn-primary" style={{ textAlign: 'center', justifyContent: 'center', marginTop: '0.5rem' }}>
+          <a href="#calendar" onClick={e => handleLink(e, '#calendar')} className="btn-primary" style={{ textAlign: 'center', justifyContent: 'center', marginTop: '0.5rem' }}>
             Контакт
           </a>
         </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { SectionLabel } from '../common/SectionLabel';
 
 const IMG = 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=900&q=80';
 
@@ -51,7 +52,7 @@ export default function AboutPreview({ onNavigate }: AboutPreviewProps = {}) {
 
         {/* Text */}
         <div>
-          <span className="section-label">За нас</span>
+          <SectionLabel>За нас</SectionLabel>
           <h2 className="section-title">
             Вашият надежден<br/>партньор за ремонт
           </h2>

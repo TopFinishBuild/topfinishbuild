@@ -6,8 +6,10 @@
     "main": "functions/app.ts",
     "scripts": {
         "start": "tsx ./functions/app.ts",
-        "dev": "tsx watch --env-file ../.env ./functions/app.ts",
-        "seed-categories": "tsx --env-file ../.env ./scripts/seed-categories.ts"
+        "dev": "tsx watch ./functions/app.ts",
+        "seed-categories": "tsx ./scripts/seed-categories.ts",
+        "seed-testimonials": "tsx ./scripts/seed-testimonials.ts",
+        "seed-beforeafter": "tsx ./scripts/seed-beforeafter.ts"
     },
     "author": "",
     "license": "ISC",
