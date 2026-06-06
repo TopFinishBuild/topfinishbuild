@@ -15,6 +15,8 @@ const WHITE  = '#ffffff';
 export default function TeamSchedule() {
   const [form, setForm]         = useState<Form>({ name:'', email:'', phone:'', message:'' });
   const [busyDates, setBusyDates] = useState<Set<string>>(new Set());
+  const [sending, setSending]   = useState(false);
+  const canSubmit = form.name.trim() && form.email.trim() && form.phone.trim() && form.message.trim();
 
   useEffect(() => {
     api.get<{ dates: string[] }>('/calendar')
@@ -22,10 +24,23 @@ export default function TeamSchedule() {
       .catch(() => { /* fallback to empty */ });
   }, []);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast('Благодарим за запитването! Ще се свържем с Вас скоро.');
-    setForm({ name:'', email:'', phone:'', message:'' });
+    setSending(true);
+    try {
+      await api.post('/contact/send', {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        message: form.message,
+      });
+      toast('Благодарим за запитването! Ще се свържем с Вас скоро.');
+      setForm({ name:'', email:'', phone:'', message:'' });
+    } catch {
+      toast('Грешка при изпращане. Моля опитайте отново.', 'error');
+    } finally {
+      setSending(false);
+    }
   };
 
   const fields: { label: string; key: keyof Form; type: string; ph: string }[] = [
@@ -109,9 +124,9 @@ export default function TeamSchedule() {
                   style={{ ...inputStyle, resize:'none' }}
                 />
               </div>
-              <button type="submit" style={{
+              <button type="submit" disabled={!canSubmit || sending} style={{
                 marginTop:'auto',
-                background: ORANGE,
+                background: (!canSubmit || sending) ? '#f59e6b' : ORANGE,
                 color: WHITE,
                 fontFamily: FH,
                 fontSize: 15, fontWeight: 700,
@@ -120,11 +135,13 @@ export default function TeamSchedule() {
                 padding: '15px 32px',
                 borderRadius: 8,
                 border: 'none',
-                cursor: 'pointer',
+                cursor: (!canSubmit || sending) ? 'not-allowed' : 'pointer',
                 width: '100%',
                 whiteSpace: 'nowrap',
+                opacity: (!canSubmit || sending) ? 0.6 : 1,
+                transition: 'background 0.2s, opacity 0.2s',
               }}>
-                Изпрати Запитване
+                {sending ? 'Изпращане...' : 'Изпрати Запитване'}
               </button>
             </form>
           </div>
