@@ -27,7 +27,7 @@ const NAV_ITEMS: { tab: Tab; label: string; icon: string }[] = [
     { tab: 'security',    label: 'Сигурност', icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' },
 ];
 
-export default function AdminPage({ onNavigate }: Props) {
+export default function AdminPage({ onNavigate: _onNavigate }: Props) {
     const [adminName, setAdminName] = useState<string | null>(() =>
         token.get() ? 'Администратор' : null
     );

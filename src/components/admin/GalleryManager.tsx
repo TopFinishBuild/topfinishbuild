@@ -39,7 +39,7 @@ function computeGlobalOrders(cats: DraftCat[], imgs: GalleryImage[]) {
     return result;
 }
 
-import { inp, lbl, card, sectionTitle, muted, successBox, errorBox, primaryBtn, ghostBtn, dangerBtn, ORANGE, NAVY, FH } from './theme';
+import { inp, lbl, card, sectionTitle, muted, successBox, errorBox, primaryBtn, ORANGE, NAVY, FH } from './theme';
 
 const actionBtn = (active: boolean, orange = false): React.CSSProperties => ({
     background: orange ? (active ? ORANGE : '#fff') : (active ? '#f1f5f9' : '#fff'),

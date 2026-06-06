@@ -42,15 +42,12 @@ interface FooterProps { onNavigate?: (href: string) => void; }
 export default function Footer({ onNavigate }: FooterProps = {}) {
     const [phone1, setPhone1] = useState('+359 888 123 456');
     const [phone2, setPhone2] = useState('');
-    const [email1, setEmail1] = useState('info@topfinish.bg');
-    const [email2, setEmail2] = useState('');
+    const email1 = 'topfinishbuild@gmail.com'; // fixed — not editable via admin
 
     useEffect(() => {
         fetchSettings().then(s => {
             if (s.phone1) setPhone1(s.phone1);
             if (s.phone2 !== undefined) setPhone2(s.phone2);
-            if (s.email1) setEmail1(s.email1);
-            if (s.email2 !== undefined) setEmail2(s.email2);
         }).catch(() => { /* keep defaults */ });
     }, []);
 
@@ -123,12 +120,6 @@ export default function Footer({ onNavigate }: FooterProps = {}) {
                             <EmailIcon />
                             {email1}
                         </div>
-                        {email2 && (
-                            <div className="footer__contact-item">
-                                <EmailIcon />
-                                {email2}
-                            </div>
-                        )}
                         <div className="footer__contact-item">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>

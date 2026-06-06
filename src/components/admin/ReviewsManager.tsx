@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../api/client';
-import { inp, lbl, card, sectionTitle, muted, successBox, errorBox, primaryBtn, ORANGE, NAVY, FH } from './theme';
+import { inp, lbl, card, sectionTitle, muted, successBox, errorBox, primaryBtn, ORANGE, FH } from './theme';
 
 interface Testimonial {
     _id: string; text: string; name: string;
