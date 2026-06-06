@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../api/client';
 import { partners as staticPartners } from '../../data';
+import { SectionLabel } from '../common/SectionLabel';
 
 interface Partner {
     _id: string;
@@ -23,10 +24,10 @@ export default function Partners() {
     }, []);
 
     return (
-        <section id="partners" style={{ padding: '5rem 0', background: '#fff' }}>
+        <section id="partniori" style={{ padding: '5rem 0', background: '#fff' }}>
             <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1.5rem' }}>
                 <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-                    <span className="section-label">Сътрудничество</span>
+                    <SectionLabel>Сътрудничество</SectionLabel>
                     <h2 className="section-title">Нашите <em>Партньори</em></h2>
                     <div className="divider" />
                     <p style={{ color: '#6b7280', fontSize: '1.0625rem', marginTop: '0.875rem' }}>Работим само с най-добрите в бранша</p>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import ServiceCard from '../sections/ServiceCard';
 import { useSwipe } from '../../hooks/useSwipe';
+import { SectionLabel } from '../common/SectionLabel';
 
 const SERVICES = [
   { icon: 'bath', title: 'Баня / WC', desc: 'Пълна реновация на бани — плочки, санитария, ВиК, шпакловка и бои.' },
@@ -109,12 +110,12 @@ export default function Services() {
   }, []);
 
   return (
-    <section id="services" className="services">
+    <section id="uslugi" className="services">
       <div className="container">
 
         <div className="services__header">
           <div>
-            <span className="section-label">Услуги</span>
+            <SectionLabel>Услуги</SectionLabel>
             <h2 className="section-title">
               ВСИЧКО ЗА<br />ВАШИЯ <em>РЕМОНТ</em>
             </h2>

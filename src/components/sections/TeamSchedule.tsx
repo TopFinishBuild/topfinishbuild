@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import BusyCalendar from '../sections/BusyCalendar';
 import { api } from '../../api/client';
+import { toast } from '../../utils/toast';
+import { SectionLabel } from '../common/SectionLabel';
 
 type Form = { name: string; email: string; phone: string; message: string };
 
@@ -22,7 +24,7 @@ export default function TeamSchedule() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Благодарим за запитването! Ще се свържем с Вас скоро.');
+    toast('Благодарим за запитването! Ще се свържем с Вас скоро.');
     setForm({ name:'', email:'', phone:'', message:'' });
   };
 
@@ -60,7 +62,7 @@ export default function TeamSchedule() {
 
         {/* Header */}
         <div style={{ textAlign:'center', marginBottom:56 }}>
-          <span className="section-label">График</span>
+          <SectionLabel>График</SectionLabel>
           <h2 className="section-title" style={{ color: WHITE }}>
             Заетост на екипа
           </h2>

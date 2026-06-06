@@ -1,3 +1,5 @@
+import { PageHero } from '../common/PageHero';
+
 interface PricingPageProps {
   onNavigate: (href: string) => void;
 }
@@ -5,14 +7,7 @@ interface PricingPageProps {
 export default function PricingPage({ onNavigate }: PricingPageProps) {
   return (
     <div className="pricing-page">
-      <div className="page-hero">
-        <div className="container">
-          <span className="section-label" style={{ marginTop: 16, display: 'inline-block' }}>Цени</span>
-          <h1 className="section-title" style={{ color: '#fff', marginTop: 10 }}>
-            ОЧАКВАЙТЕ <em>СКОРО</em>
-          </h1>
-        </div>
-      </div>
+      <PageHero label="Цени" title={<>ОЧАКВАЙТЕ <em>СКОРО</em></>} />
 
       <div className="pricing-page__content">
         <div className="container">

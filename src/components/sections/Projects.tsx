@@ -1,19 +1,24 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../api/client';
 import ProjectCard from '../sections/ProjectCard';
+import { buildSlug } from '../../utils/slug';
+import { SectionLabel } from '../common/SectionLabel';
 
 interface GalleryImage {
     _id: string;
     label: string;
+    category: string;
     url: string;
     urlSmall?: string;
+    city?: string;
 }
 
 interface ProjectsProps {
     onViewAll: () => void;
+    onNavigate: (href: string) => void;
 }
 
-export default function Projects({ onViewAll }: ProjectsProps) {
+export default function Projects({ onViewAll, onNavigate }: ProjectsProps) {
     const [items, setItems] = useState<GalleryImage[]>([]);
 
     useEffect(() => {
@@ -26,14 +31,20 @@ export default function Projects({ onViewAll }: ProjectsProps) {
         <section id="projects" className="projects">
             <div className="container">
                 <div className="projects__header">
-                    <span className="section-label">Портфолио</span>
+                    <SectionLabel>Портфолио</SectionLabel>
                     <h2 className="section-title">НАШИТЕ <em>ПРОЕКТИ</em></h2>
                     <div className="divider" />
                 </div>
 
                 <div className="projects__grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24, marginTop: 32 }}>
                     {items.map(img => (
-                        <ProjectCard key={img._id} label={img.label} src={img.urlSmall ?? img.url} />
+                        <div
+                            key={img._id}
+                            onClick={() => onNavigate(`/remont-snimki/${buildSlug(img.category, img.label, img.city)}`)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            <ProjectCard label={img.label} src={img.urlSmall ?? img.url} />
+                        </div>
                     ))}
                 </div>
 

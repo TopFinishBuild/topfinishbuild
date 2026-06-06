@@ -3,6 +3,7 @@ import { api } from '../../api/client';
 import { testimonials as staticTestimonials } from '../../data';
 import TestimonialCard from '../sections/TestimonialCard';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { SectionLabel } from '../common/SectionLabel';
 import { useSwipe } from '../../hooks/useSwipe';
 
 interface Testimonial {
@@ -53,7 +54,7 @@ export default function Testimonials() {
             <div className="container">
 
                 <div className="testimonials__header">
-                    <span className="section-label">Отзиви</span>
+                    <SectionLabel>Отзиви</SectionLabel>
                     <h2 className="section-title">Доволни клиенти</h2>
                     <div className="divider" />
                     <p style={{ fontFamily: 'var(--d7-fb)', fontSize: 16, color: 'var(--d7-gray)', marginTop: 8 }}>

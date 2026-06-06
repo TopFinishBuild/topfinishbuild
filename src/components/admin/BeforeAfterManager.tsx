@@ -12,8 +12,7 @@ interface Pair {
     order?: number;
 }
 
-const inp: React.CSSProperties = { width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '9px 12px', color: '#f1f5f9', fontSize: 14, boxSizing: 'border-box', outline: 'none' };
-const lbl: React.CSSProperties = { display: 'block', color: '#b0c4d5', fontSize: 12, fontWeight: 600, marginBottom: 4 };
+import { inp, lbl, card, sectionTitle, muted, successBox, errorBox, primaryBtn, ORANGE, NAVY, FH } from './theme';
 
 function ImagePicker({ label, preview, onFile }: { label: string; preview: string | null; onFile: (f: { base64: string; name: string; type: string }) => void }) {
     const ref = useRef<HTMLInputElement>(null);
@@ -31,11 +30,11 @@ function ImagePicker({ label, preview, onFile }: { label: string; preview: strin
             <label style={lbl}>{label}</label>
             <div
                 onClick={() => ref.current?.click()}
-                style={{ width: '100%', height: 120, borderRadius: 8, border: '2px dashed #334155', cursor: 'pointer', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}
+                style={{ width: '100%', height: 120, borderRadius: 8, border: '2px dashed #e2e8f0', cursor: 'pointer', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}
             >
                 {preview
                     ? <img src={preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : <span style={{ color: '#8fa4b8', fontSize: 12, textAlign: 'center', padding: 8 }}>Кликни за снимка</span>
+                    : <span style={{ color: '#94a3b8', fontSize: 12, textAlign: 'center', padding: 8, fontFamily: FH }}>Кликни за снимка</span>
                 }
             </div>
             <input ref={ref} type="file" accept="image/*" onChange={onChange} style={{ display: 'none' }} />
@@ -146,155 +145,85 @@ export default function BeforeAfterManager() {
 
     return (
         <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h2 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, margin: 0 }}>Преди и След</h2>
-                {!showForm && (
-                    <button onClick={openAdd} style={{ background: '#f97316', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-                        + Добави нова
-                    </button>
-                )}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                <h2 style={{ ...sectionTitle, fontSize: 22, margin: 0 }}>Преди и След</h2>
+                {!showForm && <button onClick={openAdd} style={primaryBtn()}>+ Добави нова</button>}
             </div>
-            <p style={{ color: '#7b93a8', fontSize: 13, marginTop: 4, marginBottom: 24 }}>
-                Всички трансформации се показват на страница /predi-i-sled. Първата се показва и на началната страница.
+            <p style={{ ...muted, marginTop: 6, marginBottom: 24 }}>
+                Всички трансформации се показват на /predi-i-sled. Първата — и на началната страница.
             </p>
 
-            {success && (
-                <div style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 8, padding: '10px 16px', color: '#86efac', fontSize: 13, marginBottom: 16 }}>
-                    {success}
-                </div>
-            )}
+            {success && <div style={successBox}>{success}</div>}
 
-            {/* Form */}
             {showForm && (
-                <div style={{ background: '#1e293b', borderRadius: 12, padding: 24, marginBottom: 24 }}>
-                    <h3 style={{ color: '#dae4ee', fontSize: 16, fontWeight: 600, margin: '0 0 20px' }}>
-                        {editId ? 'Редактирай трансформация' : 'Нова трансформация'}
-                    </h3>
+                <div style={card}>
+                    <h3 style={sectionTitle}>{editId ? 'Редактирай трансформация' : 'Нова трансформация'}</h3>
                     <form onSubmit={save} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div>
                             <label style={lbl}>Описание *</label>
-                            <input
-                                style={inp}
-                                value={form.title}
-                                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                                required
-                                placeholder="напр. Цялостен ремонт апартамент, кв. Младост"
-                            />
+                            <input style={inp} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required placeholder="напр. Цялостен ремонт апартамент, кв. Младост" />
                         </div>
-
                         <div style={{ display: 'flex', gap: 16 }}>
-                            <ImagePicker
-                                label={editId ? 'Снимка ПРЕДИ (незадължително — за замяна)' : 'Снимка ПРЕДИ *'}
-                                preview={form.beforePreview}
-                                onFile={f => setForm(prev => ({ ...prev, beforeFile: f, beforePreview: f.base64 }))}
-                            />
-                            <ImagePicker
-                                label={editId ? 'Снимка СЛЕД (незадължително — за замяна)' : 'Снимка СЛЕД *'}
-                                preview={form.afterPreview}
-                                onFile={f => setForm(prev => ({ ...prev, afterFile: f, afterPreview: f.base64 }))}
-                            />
+                            <ImagePicker label={editId ? 'Снимка ПРЕДИ (за замяна)' : 'Снимка ПРЕДИ *'} preview={form.beforePreview} onFile={f => setForm(prev => ({ ...prev, beforeFile: f, beforePreview: f.base64 }))} />
+                            <ImagePicker label={editId ? 'Снимка СЛЕД (за замяна)' : 'Снимка СЛЕД *'}   preview={form.afterPreview}  onFile={f => setForm(prev => ({ ...prev, afterFile: f, afterPreview: f.base64 }))} />
                         </div>
-
                         {form.beforePreview && form.afterPreview && (
                             <div>
                                 <label style={lbl}>Преглед</label>
-                                <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #334155' }}>
+                                <div style={{ borderRadius: 10, overflow: 'hidden', border: '1.5px solid #e2e8f0' }}>
                                     <BeforeAfterSlider beforeUrl={form.beforePreview} afterUrl={form.afterPreview} />
                                 </div>
                             </div>
                         )}
-
-                        {editId && (
-                            <p style={{ color: '#7b93a8', fontSize: 12, margin: 0 }}>
-                                Оставете снимките непроменени, ако искате само да обновите описанието.
-                            </p>
-                        )}
-
-                        {error && <div style={{ color: '#fca5a5', fontSize: 13 }}>{error}</div>}
-
+                        {editId && <p style={{ ...muted, fontSize: 12, margin: 0 }}>Оставете снимките непроменени, ако искате само да обновите описанието.</p>}
+                        {error && <div style={errorBox}>{error}</div>}
                         <div style={{ display: 'flex', gap: 10 }}>
-                            <button type="submit" disabled={saving} style={{ background: '#f97316', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 24px', fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }}>
-                                {saving ? 'Запазване...' : editId ? 'Обнови' : 'Добави'}
-                            </button>
-                            <button type="button" onClick={cancel} style={{ background: '#334155', color: '#cbd5e1', border: 'none', borderRadius: 8, padding: '9px 24px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-                                Откажи
-                            </button>
+                            <button type="submit" disabled={saving} style={primaryBtn(saving)}>{saving ? 'Запазване...' : editId ? 'Обнови' : 'Добави'}</button>
+                            <button type="button" onClick={cancel} style={{ background: '#f1f5f9', color: '#475569', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '9px 24px', fontSize: 13, fontWeight: 700, fontFamily: FH, cursor: 'pointer' }}>Откажи</button>
                         </div>
                     </form>
                 </div>
             )}
 
-            {/* List */}
-            {loading ? (
-                <div style={{ color: '#8fa4b8', fontSize: 14 }}>Зареждане...</div>
-            ) : pairs.length === 0 ? (
-                <div style={{ color: '#8fa4b8', fontSize: 14 }}>Няма добавени трансформации. Добавете или стартирайте seed скрипта.</div>
-            ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {loading ? <div style={muted}>Зареждане...</div>
+            : pairs.length === 0 ? <div style={muted}>Няма добавени трансформации.</div>
+            : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {pairs.map((pair, idx) => (
-                        <div
-                            key={pair._id}
-                            draggable
-                            onDragStart={() => onDragStart(idx)}
-                            onDragEnter={() => onDragEnter(idx)}
-                            onDragEnd={() => void onDragEnd()}
-                            onDragOver={e => e.preventDefault()}
-                            style={{
-                                background: '#1e293b',
-                                borderRadius: 10,
-                                padding: 16,
-                                display: 'flex',
-                                gap: 16,
-                                alignItems: 'center',
-                                outline: dragOver === idx ? '1px solid rgba(249,115,22,0.5)' : idx === 0 ? '1px solid rgba(249,115,22,0.2)' : 'none',
-                                opacity: dragIdx === idx ? 0.5 : 1,
-                                cursor: 'grab',
-                            }}
+                        <div key={pair._id} draggable
+                            onDragStart={() => onDragStart(idx)} onDragEnter={() => onDragEnter(idx)}
+                            onDragEnd={() => void onDragEnd()} onDragOver={e => e.preventDefault()}
+                            style={{ background: '#fff', border: `1.5px solid ${dragOver === idx ? ORANGE : idx === 0 ? 'rgba(240,116,32,0.3)' : '#e2e8f0'}`, borderRadius: 10, padding: 16, display: 'flex', gap: 16, alignItems: 'center', opacity: dragIdx === idx ? 0.5 : 1, cursor: 'grab', boxShadow: '0 1px 4px rgba(15,31,61,0.06)' }}
                         >
-                            {/* Drag handle */}
-                            <div style={{ color: '#334155', flexShrink: 0 }}>
+                            <div style={{ color: '#cbd5e1', flexShrink: 0 }}>
                                 <svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor">
                                     <circle cx="4" cy="4" r="2"/><circle cx="10" cy="4" r="2"/>
                                     <circle cx="4" cy="10" r="2"/><circle cx="10" cy="10" r="2"/>
                                     <circle cx="4" cy="16" r="2"/><circle cx="10" cy="16" r="2"/>
                                 </svg>
                             </div>
-
-                            {/* Index badge */}
-                            <div style={{ flexShrink: 0, width: 28, height: 28, borderRadius: '50%', background: idx === 0 ? 'rgba(249,115,22,0.2)' : '#0f172a', border: `1px solid ${idx === 0 ? 'rgba(249,115,22,0.4)' : '#334155'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: idx === 0 ? '#f97316' : '#8fa4b8', fontSize: 12, fontWeight: 700 }}>
-                                {idx + 1}
-                            </div>
-
-                            {/* Thumbnails */}
                             <div style={{ flexShrink: 0, display: 'flex', gap: 4 }}>
-                                <div style={{ width: 64, height: 48, borderRadius: 6, overflow: 'hidden', border: '1px solid #334155', position: 'relative' }}>
+                                <div style={{ width: 64, height: 48, borderRadius: 6, overflow: 'hidden', border: '1.5px solid #e2e8f0', position: 'relative' }}>
                                     <img src={pair.beforeUrlSmall ?? pair.beforeUrl} alt="Преди" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    <span style={{ position: 'absolute', bottom: 2, left: 3, fontSize: 8, fontWeight: 700, color: '#fff', background: 'rgba(15,23,42,0.8)', borderRadius: 3, padding: '1px 4px' }}>ПРЕДИ</span>
+                                    <span style={{ position: 'absolute', bottom: 2, left: 3, fontSize: 8, fontWeight: 700, color: '#fff', background: 'rgba(15,31,61,0.75)', borderRadius: 3, padding: '1px 4px', fontFamily: FH }}>ПРЕДИ</span>
                                 </div>
-                                <div style={{ width: 64, height: 48, borderRadius: 6, overflow: 'hidden', border: '1px solid #334155', position: 'relative' }}>
+                                <div style={{ width: 64, height: 48, borderRadius: 6, overflow: 'hidden', border: '1.5px solid #e2e8f0', position: 'relative' }}>
                                     <img src={pair.afterUrlSmall ?? pair.afterUrl} alt="След" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    <span style={{ position: 'absolute', bottom: 2, right: 3, fontSize: 8, fontWeight: 700, color: '#fff', background: 'rgba(249,115,22,0.8)', borderRadius: 3, padding: '1px 4px' }}>СЛЕД</span>
+                                    <span style={{ position: 'absolute', bottom: 2, right: 3, fontSize: 8, fontWeight: 700, color: '#fff', background: `rgba(240,116,32,0.85)`, borderRadius: 3, padding: '1px 4px', fontFamily: FH }}>СЛЕД</span>
                                 </div>
                             </div>
-
-                            {/* Title */}
                             <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{ color: '#dae4ee', fontSize: 14, fontWeight: 600, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {pair.title}
-                                </p>
+                                <p style={{ color: NAVY, fontSize: 14, fontWeight: 600, fontFamily: FH, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pair.title}</p>
                                 {idx === 0 && (
-                                    <span style={{ fontSize: 10, color: '#f97316', fontWeight: 700, letterSpacing: '0.06em' }}>ПОКАЗВА СЕ НА НАЧАЛНАТА</span>
+                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(240,116,32,0.1)', border: '1px solid rgba(240,116,32,0.3)', borderRadius: 50, padding: '2px 8px', fontSize: 10, color: ORANGE, fontWeight: 700, fontFamily: FH, letterSpacing: '0.06em' }}>
+                                        <svg width="8" height="8" viewBox="0 0 24 24" fill={ORANGE}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                                        НАЧАЛНАТА СТРАНИЦА
+                                    </span>
                                 )}
                             </div>
-
-                            {/* Actions */}
                             <div style={{ flexShrink: 0, display: 'flex', gap: 8 }}>
-                                <button onClick={() => openEdit(pair)} style={{ background: '#334155', border: 'none', borderRadius: 6, padding: '6px 12px', color: '#94a3b8', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                                    Редактирай
-                                </button>
-                                <button onClick={() => void remove(pair._id)} style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 6, padding: '6px 12px', color: '#fca5a5', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                                    Изтрий
-                                </button>
+                                <button onClick={() => openEdit(pair)} style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: 6, padding: '6px 12px', color: '#475569', fontSize: 12, fontWeight: 600, fontFamily: FH, cursor: 'pointer' }}>Редактирай</button>
+                                <button onClick={() => void remove(pair._id)} style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, padding: '6px 12px', color: '#dc2626', fontSize: 12, fontWeight: 600, fontFamily: FH, cursor: 'pointer' }}>Изтрий</button>
                             </div>
                         </div>
                     ))}

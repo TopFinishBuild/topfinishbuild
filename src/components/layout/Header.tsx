@@ -6,10 +6,9 @@ interface HeaderProps {
   onNavigate?: (href: string) => void;
   activePage?: string;
   activeSection?: string;
-  calendarVisible?: boolean;
 }
 
-export default function Header({ onNavigate, activePage = 'home', activeSection = '', calendarVisible = true }: HeaderProps) {
+export default function Header({ onNavigate, activePage = 'home', activeSection = '' }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLink = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -22,9 +21,8 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
     if (href === '#prices'       && activePage === 'pricing')     return true;
     if (href === '#gallery'      && activePage === 'gallery')     return true;
     if (href === '#about'        && activePage === 'about')       return true;
-    if (href === '#calendar'     && activePage === 'calendar')    return true;
     if (href === '#predi-i-sled' && activePage === 'beforeafter') return true;
-    if (activePage === 'home' && href === activeSection)    return true;
+    if (activePage === 'home'    && href === activeSection)       return true;
     return false;
   };
 
@@ -41,7 +39,7 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
 
         {/* Desktop nav */}
         <div className="nav-desktop">
-          {NAV_LINKS.filter(([href]) => href !== '#calendar' || calendarVisible).map(([href, label]) => {
+          {NAV_LINKS.map(([href, label]) => {
             const active = isActive(href);
             return (
               <a
@@ -60,9 +58,9 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
             );
           })}
           <a
-            href="#contact"
+            href="#calendar"
             className="btn-primary"
-            onClick={e => handleLink(e, '#contact')}
+            onClick={e => handleLink(e, '#calendar')}
             style={{ padding: '0.6rem 1.5rem', fontSize: '0.9375rem' }}
           >
             Контакт
@@ -83,7 +81,7 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
       {/* Mobile menu */}
       <div className={`header-mobile-menu${menuOpen ? ' header-mobile-menu--open' : ''}`} role="navigation" aria-label="Мобилно меню">
         <div style={{ padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {NAV_LINKS.filter(([href]) => href !== '#calendar' || calendarVisible).map(([href, label]) => {
+          {NAV_LINKS.map(([href, label]) => {
             const active = isActive(href);
             return (
               <a
@@ -95,7 +93,7 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
               >{label}</a>
             );
           })}
-          <a href="#contact" onClick={e => handleLink(e, '#contact')} className="btn-primary" style={{ textAlign: 'center', justifyContent: 'center', marginTop: '0.5rem' }}>
+          <a href="#calendar" onClick={e => handleLink(e, '#calendar')} className="btn-primary" style={{ textAlign: 'center', justifyContent: 'center', marginTop: '0.5rem' }}>
             Контакт
           </a>
         </div>

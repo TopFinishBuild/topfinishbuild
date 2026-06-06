@@ -39,18 +39,18 @@ function computeGlobalOrders(cats: DraftCat[], imgs: GalleryImage[]) {
     return result;
 }
 
-const inp: React.CSSProperties = { width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '9px 12px', color: '#f1f5f9', fontSize: 14, boxSizing: 'border-box', outline: 'none' };
-const lbl: React.CSSProperties = { display: 'block', color: '#b0c4d5', fontSize: 12, fontWeight: 600, marginBottom: 4 };
+import { inp, lbl, card, sectionTitle, muted, successBox, errorBox, primaryBtn, ghostBtn, dangerBtn, ORANGE, NAVY, FH } from './theme';
+
 const actionBtn = (active: boolean, orange = false): React.CSSProperties => ({
-    background: orange ? (active ? '#f97316' : '#7c3c10') : (active ? '#334155' : '#1e293b'),
-    color: active ? '#fff' : '#7b93a8',
-    border: `1px solid ${active ? (orange ? '#f97316' : '#475569') : '#1e3a5f'}`,
-    borderRadius: 8, padding: '8px 18px', fontSize: 13, fontWeight: 700,
-    cursor: active ? 'pointer' : 'not-allowed', opacity: active ? 1 : 0.5,
+    background: orange ? (active ? ORANGE : '#fff') : (active ? '#f1f5f9' : '#fff'),
+    color: orange ? (active ? '#fff' : '#94a3b8') : (active ? NAVY : '#94a3b8'),
+    border: `1.5px solid ${active ? (orange ? ORANGE : '#cbd5e1') : '#e2e8f0'}`,
+    borderRadius: 8, padding: '8px 18px', fontSize: 13, fontWeight: 700, fontFamily: FH,
+    cursor: active ? 'pointer' : 'not-allowed', opacity: active ? 1 : 0.55,
 });
 
 const DragHandle = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#7b93a8', flexShrink: 0, cursor: 'grab' }}>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#94a3b8', flexShrink: 0, cursor: 'grab' }}>
         <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
         <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
         <circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
@@ -69,6 +69,7 @@ export default function GalleryManager() {
     const [catError, setCatError]     = useState('');
     const [newCat, setNewCat]         = useState('');
     const [showDeleted, setShowDeleted] = useState(false);
+    const [editingCatIdx, setEditingCatIdx] = useState<number | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
 
     const [form, setForm] = useState({ label: '', category: '', duration: '', city: '', area: '' });
@@ -84,6 +85,18 @@ export default function GalleryManager() {
     const activeImages  = images.filter(i => !i.deleted);
     const deletedImages = images.filter(i => i.deleted);
     const hasChanges    = !catsEqual(draftCats, savedCats);
+
+    // Live rename map: oldName → newName for renamed draft categories
+    const renameMap = new Map<string, string>();
+    savedCats.forEach(s => {
+        const d = draftCats.find(d => d._id === s._id);
+        if (d && d.name !== s.name) renameMap.set(s.name, d.name);
+    });
+    // Apply rename map to images for real-time display
+    const displayImages = activeImages.map(img => ({
+        ...img,
+        category: renameMap.get(img.category) ?? img.category,
+    }));
 
     const loadCategories = async () => {
         const cats = await fetchCategories();
@@ -125,13 +138,26 @@ export default function GalleryManager() {
 
     const removeFromDraft = (idx: number) => setDraftCats(prev => prev.filter((_, i) => i !== idx));
 
+    const renameDraftCat = (idx: number, name: string) => {
+        const trimmed = name.trim();
+        if (!trimmed) { setEditingCatIdx(null); return; }
+        setDraftCats(prev => prev.map((c, i) => i === idx ? { ...c, name: trimmed } : c));
+        setEditingCatIdx(null);
+    };
+
     const saveCats = async () => {
         setSavingCats(true); setCatError('');
         try {
-            const toDelete = savedCats.filter(s => !draftCats.find(d => d._id === s._id));
-            const toAdd    = draftCats.filter(d => !d._id);
+            const toDelete  = savedCats.filter(s => !draftCats.find(d => d._id === s._id));
+            const toAdd     = draftCats.filter(d => !d._id);
+            const toRename  = draftCats.filter(d =>
+                d._id && savedCats.find(s => s._id === d._id && s.name !== d.name)
+            );
 
-            await Promise.all(toDelete.map(c => api.delete(`/categories/${c._id}`)));
+            await Promise.all([
+                ...toDelete.map(c  => api.delete(`/categories/${c._id}`)),
+                ...toRename.map(c  => api.put(`/categories/${c._id}`, { name: c.name })),
+            ]);
 
             const addResults = await Promise.all(
                 toAdd.map(c => api.post<{ category: { _id: string; name: string } }>('/categories', { name: c.name }))
@@ -150,7 +176,7 @@ export default function GalleryManager() {
             }
 
             invalidateCategoriesCache();
-            await loadCategories();
+            await Promise.all([loadCategories(), loadImages()]); // reload images too — category names changed
         } catch (err) {
             setCatError(err instanceof Error ? err.message : 'Грешка при запазване');
         } finally {
@@ -280,18 +306,16 @@ export default function GalleryManager() {
 
     return (
         <div>
-            <h2 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, margin: '0 0 28px' }}>Галерия</h2>
-
             {/* Categories */}
-            <div style={{ background: '#1e293b', borderRadius: 12, padding: 24, marginBottom: 24 }}>
-                <h3 style={{ color: '#dae4ee', fontSize: 16, fontWeight: 600, margin: '0 0 14px' }}>
+            <div style={card}>
+                <h3 style={sectionTitle}>
                     Категории
-                    <span style={{ color: '#7b93a8', fontSize: 12, fontWeight: 400, marginLeft: 10 }}>влачи за пренареждане</span>
+                    <span style={{ color: '#94a3b8', fontSize: 12, fontWeight: 400, marginLeft: 10, fontFamily: FH }}>влачи за пренареждане</span>
                 </h3>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minHeight: 36, marginBottom: 14 }}>
-                    {loading && <span style={{ color: '#8fa4b8', fontSize: 13 }}>Зареждане...</span>}
-                    {!loading && draftCats.length === 0 && <span style={{ color: '#8fa4b8', fontSize: 13 }}>Няма категории</span>}
+                    {loading && <span style={muted}>Зареждане...</span>}
+                    {!loading && draftCats.length === 0 && <span style={muted}>Няма категории</span>}
                     {draftCats.map((cat, i) => (
                         <div
                             key={cat._id ?? `new-${i}`}
@@ -302,19 +326,40 @@ export default function GalleryManager() {
                             onDragEnd={() => { setDragCat(null); setDragCatOver(null); }}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: 10,
-                                background: dragCatOver === cat._id ? 'rgba(249,115,22,0.08)' : (cat._id ? '#0f172a' : 'rgba(249,115,22,0.12)'),
-                                border: `1px solid ${dragCatOver === cat._id ? 'rgba(249,115,22,0.6)' : (cat._id ? '#334155' : 'rgba(249,115,22,0.4)')}`,
+                                background: dragCatOver === cat._id ? 'rgba(240,116,32,0.06)' : (cat._id ? '#f8fafc' : 'rgba(240,116,32,0.08)'),
+                                border: `1.5px solid ${dragCatOver === cat._id ? ORANGE : (cat._id ? '#e2e8f0' : 'rgba(240,116,32,0.35)')}`,
                                 borderRadius: 8, padding: '8px 12px',
                                 opacity: dragCat === cat._id ? 0.4 : 1,
                                 transition: 'border-color 0.15s, background 0.15s',
                             }}
                         >
                             {cat._id && <DragHandle />}
-                            <span style={{ color: cat._id ? '#cbd5e1' : '#fb923c', fontSize: 13, fontWeight: 600, flex: 1 }}>{cat.name}</span>
-                            {!cat._id && <span style={{ fontSize: 10, color: '#f97316', fontWeight: 700 }}>НОВО</span>}
+
+                            {/* Inline editable name */}
+                            {editingCatIdx === i ? (
+                                <input
+                                    autoFocus
+                                    defaultValue={cat.name}
+                                    style={{ ...inp, flex: 1, padding: '4px 8px', fontSize: 13, fontWeight: 600 }}
+                                    onBlur={e => renameDraftCat(i, e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter')  renameDraftCat(i, (e.target as HTMLInputElement).value);
+                                        if (e.key === 'Escape') setEditingCatIdx(null);
+                                    }}
+                                    onClick={e => e.stopPropagation()}
+                                />
+                            ) : (
+                                <span
+                                    style={{ color: cat._id ? NAVY : ORANGE, fontSize: 13, fontWeight: 600, fontFamily: FH, flex: 1, cursor: 'text' }}
+                                    title="Кликни за преименуване"
+                                    onClick={e => { e.stopPropagation(); setEditingCatIdx(i); }}
+                                >{cat.name}</span>
+                            )}
+
+                            {!cat._id && <span style={{ fontSize: 10, color: ORANGE, fontWeight: 700, fontFamily: FH }}>НОВО</span>}
                             <button
                                 onClick={() => removeFromDraft(i)}
-                                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', padding: '2px 4px', borderRadius: 4, display: 'flex' }}
+                                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '2px 4px', borderRadius: 4, display: 'flex' }}
                                 title="Премахни"
                             >
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -323,7 +368,7 @@ export default function GalleryManager() {
                     ))}
                 </div>
 
-                {catError && <div style={{ color: '#fca5a5', fontSize: 13, marginBottom: 10 }}>{catError}</div>}
+                {catError && <div style={{ ...errorBox, marginBottom: 10 }}>{catError}</div>}
 
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <input
@@ -334,7 +379,7 @@ export default function GalleryManager() {
                         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addToDraft(); } }}
                     />
                     <button onClick={addToDraft} disabled={!newCat.trim()} style={actionBtn(!!newCat.trim(), true)}>+ Добави</button>
-                    <div style={{ width: 1, height: 28, background: '#334155', flexShrink: 0 }} />
+                    <div style={{ width: 1, height: 28, background: '#e2e8f0', flexShrink: 0 }} />
                     <button onClick={() => void saveCats()} disabled={!hasChanges || savingCats} style={actionBtn(hasChanges && !savingCats, true)}>
                         {savingCats ? 'Запазване...' : 'Запази'}
                     </button>
@@ -343,17 +388,17 @@ export default function GalleryManager() {
             </div>
 
             {/* Upload form */}
-            <div style={{ background: '#1e293b', borderRadius: 12, padding: 24, marginBottom: 32 }}>
-                <h3 style={{ color: '#dae4ee', fontSize: 16, fontWeight: 600, margin: '0 0 20px' }}>Качи нова снимка</h3>
+            <div style={card}>
+                <h3 style={sectionTitle}>Качи нова снимка</h3>
                 <form onSubmit={upload} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
                     <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 20, alignItems: 'flex-start' }}>
                         <div
                             onClick={() => fileRef.current?.click()}
-                            style={{ flexShrink: 0, width: 120, height: 100, borderRadius: 8, border: '2px dashed #334155', cursor: 'pointer', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}
+                            style={{ flexShrink: 0, width: 120, height: 100, borderRadius: 8, border: '2px dashed #e2e8f0', cursor: 'pointer', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}
                         >
                             {preview
                                 ? <img src={preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                : <span style={{ color: '#64748b', fontSize: 13, textAlign: 'center', padding: 8 }}>Избери файл</span>
+                                : <span style={{ color: '#94a3b8', fontSize: 13, textAlign: 'center', padding: 8, fontFamily: FH }}>Избери файл</span>
                             }
                         </div>
                         <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: 'none' }} />
@@ -374,11 +419,11 @@ export default function GalleryManager() {
                     <div><label style={lbl}>Град</label><input style={inp} value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} placeholder="напр. София" /></div>
                     <div><label style={lbl}>Площ</label><input style={inp} value={form.area} onChange={e => setForm(f => ({ ...f, area: e.target.value }))} placeholder="напр. 45 м²" /></div>
 
-                    {error   && <div style={{ gridColumn: '1/-1', color: '#fca5a5', fontSize: 13 }}>{error}</div>}
-                    {success && <div style={{ gridColumn: '1/-1', color: '#86efac', fontSize: 13 }}>{success}</div>}
+                    {error   && <div style={{ gridColumn: '1/-1', ...errorBox }}>{error}</div>}
+                    {success && <div style={{ gridColumn: '1/-1', ...successBox }}>{success}</div>}
 
                     <div style={{ gridColumn: '1/-1' }}>
-                        <button type="submit" disabled={uploading || savedCats.length === 0} style={{ background: '#f97316', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 28px', fontSize: 14, fontWeight: 700, cursor: uploading || savedCats.length === 0 ? 'not-allowed' : 'pointer', opacity: uploading || savedCats.length === 0 ? 0.7 : 1 }}>
+                        <button type="submit" disabled={uploading || savedCats.length === 0} style={primaryBtn(uploading || savedCats.length === 0)}>
                             {uploading ? 'Качване...' : 'Качи снимката'}
                         </button>
                     </div>
@@ -387,22 +432,22 @@ export default function GalleryManager() {
 
             {/* Active images grouped by category */}
             {loading ? (
-                <div style={{ color: '#8fa4b8', fontSize: 14 }}>Зареждане...</div>
-            ) : activeImages.length === 0 ? (
-                <div style={{ color: '#8fa4b8', fontSize: 14 }}>Няма качени снимки</div>
+                <div style={muted}>Зареждане...</div>
+            ) : displayImages.length === 0 ? (
+                <div style={muted}>Няма качени снимки</div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                     {draftCats.map(cat => {
-                        const catImgs = activeImages.filter(i => i.category === cat.name);
+                        const catImgs = displayImages.filter(i => i.category === cat.name);
                         return (
                             <div key={cat._id ?? cat.name}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                                    <h3 style={{ color: '#c8d8e8', fontSize: 14, fontWeight: 700, margin: 0, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{cat.name}</h3>
-                                    <span style={{ color: '#7b93a8', fontSize: 12 }}>({catImgs.length})</span>
-                                    {catImgs.length > 1 && <span style={{ color: '#7b93a8', fontSize: 11 }}>• влачи снимките за пренареждане</span>}
+                                    <h3 style={{ color: NAVY, fontSize: 13, fontWeight: 800, margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: FH }}>{cat.name}</h3>
+                                    <span style={{ color: '#94a3b8', fontSize: 12, fontFamily: FH }}>({catImgs.length})</span>
+                                    {catImgs.length > 1 && <span style={{ color: '#94a3b8', fontSize: 11, fontFamily: FH }}>• влачи снимките за пренареждане</span>}
                                 </div>
                                 {catImgs.length === 0 ? (
-                                    <div style={{ color: '#7b93a8', fontSize: 13, fontStyle: 'italic' }}>Няма снимки</div>
+                                    <div style={{ color: '#94a3b8', fontSize: 13, fontStyle: 'italic', fontFamily: FH }}>Няма снимки</div>
                                 ) : (
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
                                         {catImgs.map(img => (
@@ -414,21 +459,22 @@ export default function GalleryManager() {
                                                 onDrop={e => void onImgDrop(e, img._id)}
                                                 onDragEnd={() => { setDragImg(null); setDragImgOver(null); }}
                                                 style={{
-                                                    background: '#1e293b',
+                                                    background: '#fff', border: '1.5px solid #e2e8f0',
                                                     borderRadius: 10, overflow: 'hidden', position: 'relative',
                                                     cursor: 'grab',
-                                                    outline: dragImgOver === img._id ? '2px solid #f97316' : '2px solid transparent',
+                                                    outline: dragImgOver === img._id ? `2px solid ${ORANGE}` : '2px solid transparent',
                                                     opacity: dragImg === img._id ? 0.4 : 1,
                                                     transition: 'outline 0.1s, opacity 0.1s',
+                                                    boxShadow: '0 1px 3px rgba(15,31,61,0.06)',
                                                 }}
                                             >
                                                 <img src={img.urlSmall ?? img.url} alt={img.label} style={{ width: '100%', height: 130, objectFit: 'cover', display: 'block', pointerEvents: 'none' }} />
                                                 <div style={{ padding: '8px 10px' }}>
-                                                    <p style={{ color: '#f1f5f9', fontSize: 12, fontWeight: 600, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{img.label}</p>
+                                                    <p style={{ color: NAVY, fontSize: 12, fontWeight: 600, fontFamily: FH, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{img.label}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => void softDelete(img._id)}
-                                                    style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(239,68,68,0.85)', border: 'none', borderRadius: 6, width: 26, height: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}
+                                                    style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(239,68,68,0.88)', border: 'none', borderRadius: 6, width: 26, height: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}
                                                     title="Изтрий"
                                                 >
                                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -441,23 +487,23 @@ export default function GalleryManager() {
                         );
                     })}
 
-                    {/* Orphaned images (no matching category) */}
+                    {/* Orphaned */}
                     {(() => {
                         const catNames = new Set(draftCats.map(c => c.name));
-                        const orphaned = activeImages.filter(i => !catNames.has(i.category));
+                        const orphaned = displayImages.filter(i => !catNames.has(i.category));
                         if (orphaned.length === 0) return null;
                         return (
                             <div>
-                                <h3 style={{ color: '#8fa4b8', fontSize: 14, fontWeight: 700, margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Без категория</h3>
+                                <h3 style={{ color: '#94a3b8', fontSize: 13, fontWeight: 700, margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: FH }}>Без категория</h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
                                     {orphaned.map(img => (
-                                        <div key={img._id} style={{ background: '#1e293b', borderRadius: 10, overflow: 'hidden', position: 'relative' }}>
+                                        <div key={img._id} style={{ background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: 10, overflow: 'hidden', position: 'relative', boxShadow: '0 1px 3px rgba(15,31,61,0.06)' }}>
                                             <img src={img.urlSmall ?? img.url} alt={img.label} style={{ width: '100%', height: 130, objectFit: 'cover', display: 'block' }} />
                                             <div style={{ padding: '8px 10px' }}>
-                                                <p style={{ color: '#f1f5f9', fontSize: 12, fontWeight: 600, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{img.label}</p>
-                                                <p style={{ color: '#8fa4b8', fontSize: 11, margin: 0 }}>{img.category}</p>
+                                                <p style={{ color: NAVY, fontSize: 12, fontWeight: 600, fontFamily: FH, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{img.label}</p>
+                                                <p style={{ color: '#94a3b8', fontSize: 11, fontFamily: FH, margin: 0 }}>{img.category}</p>
                                             </div>
-                                            <button onClick={() => void softDelete(img._id)} style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(239,68,68,0.85)', border: 'none', borderRadius: 6, width: 26, height: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }} title="Изтрий">
+                                            <button onClick={() => void softDelete(img._id)} style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(239,68,68,0.88)', border: 'none', borderRadius: 6, width: 26, height: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }} title="Изтрий">
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                             </button>
                                         </div>
@@ -471,10 +517,10 @@ export default function GalleryManager() {
 
             {/* Deleted images */}
             {deletedImages.length > 0 && (
-                <div style={{ marginTop: 40 }}>
+                <div style={{ marginTop: 32 }}>
                     <button
                         onClick={() => setShowDeleted(v => !v)}
-                        style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'transparent', border: '1px solid #334155', borderRadius: 8, padding: '8px 16px', color: '#8fa4b8', fontSize: 13, fontWeight: 600, cursor: 'pointer', marginBottom: showDeleted ? 16 : 0 }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '8px 16px', color: '#64748b', fontSize: 13, fontWeight: 600, fontFamily: FH, cursor: 'pointer', marginBottom: showDeleted ? 16 : 0 }}
                     >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points={showDeleted ? '18 15 12 9 6 15' : '6 9 12 15 18 9'}/></svg>
                         Изтрити снимки ({deletedImages.length})
@@ -483,20 +529,14 @@ export default function GalleryManager() {
                     {showDeleted && (
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
                             {deletedImages.map(img => (
-                                <div key={img._id} style={{ background: '#1e293b', borderRadius: 10, overflow: 'hidden', opacity: 0.7 }}>
-                                    <img src={img.urlSmall ?? img.url} alt={img.label} style={{ width: '100%', height: 130, objectFit: 'cover', display: 'block', filter: 'grayscale(0.5)' }} />
+                                <div key={img._id} style={{ background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: 10, overflow: 'hidden', opacity: 0.75 }}>
+                                    <img src={img.urlSmall ?? img.url} alt={img.label} style={{ width: '100%', height: 130, objectFit: 'cover', display: 'block', filter: 'grayscale(0.4)' }} />
                                     <div style={{ padding: '8px 10px' }}>
-                                        <p style={{ color: '#b0c4d5', fontSize: 12, fontWeight: 600, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{img.label}</p>
-                                        <p style={{ color: '#7b93a8', fontSize: 11, margin: '0 0 8px' }}>{img.category}</p>
+                                        <p style={{ color: NAVY, fontSize: 12, fontWeight: 600, fontFamily: FH, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{img.label}</p>
+                                        <p style={{ color: '#94a3b8', fontSize: 11, fontFamily: FH, margin: '0 0 8px' }}>{img.category}</p>
                                         <div style={{ display: 'flex', gap: 6 }}>
-                                            <button
-                                                onClick={() => void restore(img._id)}
-                                                style={{ flex: 1, background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6, padding: '5px 0', color: '#86efac', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
-                                            >Възстанови</button>
-                                            <button
-                                                onClick={() => void hardDelete(img._id)}
-                                                style={{ flex: 1, background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 6, padding: '5px 0', color: '#fca5a5', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
-                                            >Изтрий</button>
+                                            <button onClick={() => void restore(img._id)} style={{ flex: 1, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '5px 0', color: '#15803d', fontSize: 11, fontWeight: 700, fontFamily: FH, cursor: 'pointer' }}>Възстанови</button>
+                                            <button onClick={() => void hardDelete(img._id)} style={{ flex: 1, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, padding: '5px 0', color: '#dc2626', fontSize: 11, fontWeight: 700, fontFamily: FH, cursor: 'pointer' }}>Изтрий</button>
                                         </div>
                                     </div>
                                 </div>

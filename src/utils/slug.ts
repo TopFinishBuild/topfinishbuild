@@ -18,3 +18,11 @@ export function toSlug(s: string): string {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
 }
+
+/** /remont-snimki/{cat}/{city?-}{label} */
+export function buildSlug(category: string, label: string, city?: string): string {
+    const cat  = toSlug(category || '');
+    const lbl  = toSlug(label    || '');
+    const name = city ? `${toSlug(city)}-${lbl}` : lbl;
+    return cat ? `${cat}/${name}` : name;
+}

@@ -4,7 +4,8 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { useSwipe } from '../../hooks/useSwipe';
 import { api } from '../../api/client';
 import { fetchCategories } from '../../api/categoryCache';
-import { toSlug } from '../../utils/slug';
+import { toSlug, buildSlug } from '../../utils/slug';
+import { PageHero } from '../common/PageHero';
 
 interface GalleryItem {
   _id?: string;
@@ -46,14 +47,19 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
         duration: (img as any).duration,
         city: (img as any).city,
         area: (img as any).area,
-        slug: toSlug(img.label),
+        slug: buildSlug(img.category, img.label, (img as any).city),
       }));
       setAllItems(mapped);
 
-      // Open lightbox if initialSlug matches
+      // initialSlug with '/' = image, without = category filter
       if (initialSlug) {
-        const idx = mapped.findIndex(i => i.slug === initialSlug);
-        if (idx !== -1) setLightbox(idx);
+        if (initialSlug.includes('/')) {
+          const idx = mapped.findIndex(i => i.slug === initialSlug);
+          if (idx !== -1) setLightbox(idx);
+        } else {
+          const catMatch = catsData.find(c => toSlug(c.name) === initialSlug);
+          if (catMatch) setTab(catMatch.name);
+        }
       }
     }).catch(() => { /* leave empty */ })
       .finally(() => setLoading(false));
@@ -63,26 +69,26 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
 
   const openLightbox = (idx: number) => {
     setLightbox(idx);
-    history.pushState(null, '', `/galeria/${items[idx].slug}`);
+    history.pushState(null, '', `/remont-snimki/${items[idx].slug}`);
   };
 
   const closeLightbox = () => {
     setLightbox(null);
-    history.pushState(null, '', '/galeria');
+    history.pushState(null, '', tab === 'Всички' ? '/remont-snimki' : `/remont-snimki/${toSlug(tab)}`);
   };
 
   const prev = useCallback(() => {
     if (lightbox === null) return;
     const next = (lightbox - 1 + items.length) % items.length;
     setLightbox(next);
-    history.replaceState(null, '', `/galeria/${items[next].slug}`);
+    history.replaceState(null, '', `/remont-snimki/${items[next].slug}`);
   }, [lightbox, items]);
 
   const next = useCallback(() => {
     if (lightbox === null) return;
     const nxt = (lightbox + 1) % items.length;
     setLightbox(nxt);
-    history.replaceState(null, '', `/galeria/${items[nxt].slug}`);
+    history.replaceState(null, '', `/remont-snimki/${items[nxt].slug}`);
   }, [lightbox, items]);
 
   useEffect(() => {
@@ -102,14 +108,7 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
 
   return (
     <div className="gallery-page">
-      <div className="page-hero">
-        <div className="container">
-          <span className="section-label" style={{ marginTop: 16, display: 'inline-block' }}>Галерия</span>
-          <h1 className="section-title" style={{ color: '#fff', marginTop: 10 }}>
-            НАШИТЕ <em>ПРОЕКТИ</em>
-          </h1>
-        </div>
-      </div>
+      <PageHero label="Галерия" title={<>НАШИТЕ <em>ПРОЕКТИ</em></>} />
 
       <div className="gallery-page__content">
         <div className="container">
@@ -117,7 +116,10 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
             {cats.map(c => (
               <button key={c}
                 className={`gallery-page__filter-btn${tab === c ? ' active' : ''}`}
-                onClick={() => setTab(c)}
+                onClick={() => {
+                  setTab(c);
+                  history.pushState(null, '', c === 'Всички' ? '/remont-snimki' : `/remont-snimki/${toSlug(c)}`);
+                }}
               >{c}</button>
             ))}
           </div>
@@ -180,7 +182,7 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
               >
                 <svg width={isMobile ? 18 : 22} height={isMobile ? 18 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
               </button>
-              <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: 12, fontFamily: 'Manrope,sans-serif', padding: '3px 12px', borderRadius: 20, whiteSpace: 'nowrap' }}>
+              <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.65)', color: '#fff', fontSize: 15, fontFamily: 'Manrope,sans-serif', fontWeight: 600, padding: '6px 18px', borderRadius: 20, whiteSpace: 'nowrap', letterSpacing: '0.04em' }}>
                 {lightbox + 1} / {items.length}
               </div>
             </div>

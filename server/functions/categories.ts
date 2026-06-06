@@ -59,6 +59,34 @@ export async function deleteCategory(req: Request, res: Response): Promise<void>
     }
 }
 
+export async function renameCategory(req: Request, res: Response): Promise<void> {
+    try {
+        const { id } = req.params;
+        const { name } = req.body as { name?: string };
+        if (!name?.trim()) { res.status(400).json({ error: 'name required' }); return; }
+
+        const filter = { _id: id } as unknown as Filter<Document>;
+        const cat = await MongoDB.collection('categories').findOne(filter);
+        if (!cat) { res.status(404).json({ error: 'Категорията не е намерена' }); return; }
+
+        const oldName = (cat as any).name as string;
+        const newName = name.trim();
+
+        // Rename category + migrate all gallery images in one transaction-like batch
+        await Promise.all([
+            MongoDB.collection('categories').updateOne(filter, { $set: { name: newName } }),
+            MongoDB.collection('gallery').updateMany(
+                { category: oldName } as unknown as Filter<Document>,
+                { $set: { category: newName } }
+            ),
+        ]);
+
+        res.json({ ok: true, oldName, newName });
+    } catch (err) {
+        res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });
+    }
+}
+
 export async function reorderCategories(req: Request, res: Response): Promise<void> {
     try {
         const { items } = req.body as { items: Array<{ _id: string; order: number }> };

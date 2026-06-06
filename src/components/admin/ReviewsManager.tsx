@@ -1,17 +1,11 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../api/client';
+import { inp, lbl, card, sectionTitle, muted, successBox, errorBox, primaryBtn, ORANGE, NAVY, FH } from './theme';
 
 interface Testimonial {
-    _id: string;
-    text: string;
-    name: string;
-    subtitle: string;
-    initials: string;
-    stars: number;
+    _id: string; text: string; name: string;
+    subtitle: string; initials: string; stars: number;
 }
-
-const inp: React.CSSProperties = { width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '9px 12px', color: '#f1f5f9', fontSize: 14, boxSizing: 'border-box', outline: 'none' };
-const lbl: React.CSSProperties = { display: 'block', color: '#b0c4d5', fontSize: 12, fontWeight: 600, marginBottom: 4 };
 
 const EMPTY = { text: '', name: '', subtitle: '', initials: '', stars: 5 };
 
@@ -19,14 +13,11 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
     const [hover, setHover] = useState(0);
     return (
         <div style={{ display: 'flex', gap: 4 }}>
-            {[1, 2, 3, 4, 5].map(i => (
-                <button
-                    key={i}
-                    type="button"
-                    onMouseEnter={() => setHover(i)}
-                    onMouseLeave={() => setHover(0)}
+            {[1,2,3,4,5].map(i => (
+                <button key={i} type="button"
+                    onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(0)}
                     onClick={() => onChange(i)}
-                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 3px', fontSize: 22, color: i <= (hover || value) ? '#f97316' : '#334155', transition: 'color 0.12s' }}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 3px', fontSize: 24, color: i <= (hover || value) ? ORANGE : '#e2e8f0', transition: 'color 0.12s' }}
                     aria-label={`${i} звезди`}
                 >★</button>
             ))}
@@ -48,32 +39,15 @@ export default function ReviewsManager() {
         const res = await api.get<{ testimonials: Testimonial[] }>('/testimonials');
         setItems(res.testimonials);
     };
+    useEffect(() => { load().catch(() => setError('Грешка при зареждане')).finally(() => setLoading(false)); }, []);
 
-    useEffect(() => {
-        load().catch(() => setError('Грешка при зареждане')).finally(() => setLoading(false));
-    }, []);
-
-    const openAdd = () => {
-        setForm(EMPTY);
-        setEditId(null);
-        setShowForm(true);
-        setError('');
-    };
-
-    const openEdit = (t: Testimonial) => {
-        setForm({ text: t.text, name: t.name, subtitle: t.subtitle, initials: t.initials, stars: t.stars ?? 5 });
-        setEditId(t._id);
-        setShowForm(true);
-        setError('');
-    };
-
-    const cancel = () => { setShowForm(false); setEditId(null); setForm(EMPTY); setError(''); };
+    const openAdd  = () => { setForm(EMPTY); setEditId(null); setShowForm(true); setError(''); };
+    const openEdit = (t: Testimonial) => { setForm({ text: t.text, name: t.name, subtitle: t.subtitle, initials: t.initials, stars: t.stars ?? 5 }); setEditId(t._id); setShowForm(true); setError(''); };
+    const cancel   = () => { setShowForm(false); setEditId(null); setForm(EMPTY); setError(''); };
 
     const save = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!form.text.trim() || !form.name.trim() || !form.subtitle.trim() || !form.initials.trim()) {
-            setError('Всички полета са задължителни'); return;
-        }
+        if (!form.text.trim() || !form.name.trim() || !form.subtitle.trim() || !form.initials.trim()) { setError('Всички полета са задължителни'); return; }
         setSaving(true); setError('');
         try {
             if (editId) {
@@ -94,10 +68,8 @@ export default function ReviewsManager() {
 
     const remove = async (id: string) => {
         if (!confirm('Изтрий отзива?')) return;
-        try {
-            await api.delete(`/testimonials/${id}`);
-            setItems(prev => prev.filter(t => t._id !== id));
-        } catch { setError('Грешка при изтриване'); }
+        try { await api.delete(`/testimonials/${id}`); setItems(prev => prev.filter(t => t._id !== id)); }
+        catch { setError('Грешка при изтриване'); }
     };
 
     const f = (k: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -105,106 +77,70 @@ export default function ReviewsManager() {
 
     return (
         <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <h2 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, margin: 0 }}>Доволни клиенти</h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                <h2 style={{ ...sectionTitle, fontSize: 22, margin: 0 }}>Доволни клиенти</h2>
                 {!showForm && (
-                    <button onClick={openAdd} style={{ background: '#f97316', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-                        + Добави отзив
-                    </button>
+                    <button onClick={openAdd} style={primaryBtn()}>+ Добави отзив</button>
                 )}
             </div>
-            <p style={{ color: '#7b93a8', fontSize: 13, marginTop: 4, marginBottom: 24 }}>
-                На сайта се показват първите 3 отзива.
-            </p>
+            <p style={{ ...muted, marginBottom: 24, marginTop: 6 }}>На сайта се показват първите 3 отзива.</p>
 
-            {success && (
-                <div style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 8, padding: '10px 16px', color: '#86efac', fontSize: 13, marginBottom: 16 }}>
-                    {success}
-                </div>
-            )}
+            {success && <div style={successBox}>{success}</div>}
 
-            {/* Form */}
             {showForm && (
-                <div style={{ background: '#1e293b', borderRadius: 12, padding: 24, marginBottom: 24 }}>
-                    <h3 style={{ color: '#dae4ee', fontSize: 16, fontWeight: 600, margin: '0 0 20px' }}>
-                        {editId ? 'Редактирай отзив' : 'Нов отзив'}
-                    </h3>
+                <div style={card}>
+                    <h3 style={sectionTitle}>{editId ? 'Редактирай отзив' : 'Нов отзив'}</h3>
                     <form onSubmit={save} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                         <div>
                             <label style={lbl}>Текст на отзива *</label>
-                            <textarea
-                                style={{ ...inp, height: 100, resize: 'vertical' }}
-                                value={form.text}
-                                onChange={f('text')}
-                                required
-                                placeholder="Текст на отзива..."
-                            />
+                            <textarea style={{ ...inp, height: 100, resize: 'vertical' }} value={form.text} onChange={f('text')} required placeholder="Текст на отзива..." />
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                            <div>
-                                <label style={lbl}>Име *</label>
-                                <input style={inp} value={form.name} onChange={f('name')} required placeholder="напр. Мария Иванова" />
-                            </div>
-                            <div>
-                                <label style={lbl}>Инициали * (2-3 букви)</label>
-                                <input style={inp} value={form.initials} onChange={f('initials')} required placeholder="напр. МИ" maxLength={3} />
-                            </div>
+                            <div><label style={lbl}>Име *</label><input style={inp} value={form.name} onChange={f('name')} required placeholder="напр. Мария Иванова" /></div>
+                            <div><label style={lbl}>Инициали * (2-3 букви)</label><input style={inp} value={form.initials} onChange={f('initials')} required placeholder="напр. МИ" maxLength={3} /></div>
                         </div>
-                        <div>
-                            <label style={lbl}>Подзаглавие *</label>
-                            <input style={inp} value={form.subtitle} onChange={f('subtitle')} required placeholder="напр. Апартамент, кв. Младост" />
-                        </div>
+                        <div><label style={lbl}>Подзаглавие *</label><input style={inp} value={form.subtitle} onChange={f('subtitle')} required placeholder="напр. Апартамент, кв. Младост" /></div>
                         <div>
                             <label style={{ ...lbl, marginBottom: 8 }}>Оценка</label>
                             <StarPicker value={form.stars} onChange={v => setForm(prev => ({ ...prev, stars: v }))} />
                         </div>
-
-                        {error && <div style={{ color: '#fca5a5', fontSize: 13 }}>{error}</div>}
-
+                        {error && <div style={errorBox}>{error}</div>}
                         <div style={{ display: 'flex', gap: 10 }}>
-                            <button type="submit" disabled={saving} style={{ background: '#f97316', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 24px', fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }}>
-                                {saving ? 'Запазване...' : (editId ? 'Обнови' : 'Добави')}
-                            </button>
-                            <button type="button" onClick={cancel} style={{ background: '#334155', color: '#cbd5e1', border: 'none', borderRadius: 8, padding: '9px 24px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-                                Откажи
-                            </button>
+                            <button type="submit" disabled={saving} style={primaryBtn(saving)}>{saving ? 'Запазване...' : (editId ? 'Обнови' : 'Добави')}</button>
+                            <button type="button" onClick={cancel} style={{ background: '#f1f5f9', color: '#475569', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '9px 24px', fontSize: 13, fontWeight: 700, fontFamily: FH, cursor: 'pointer' }}>Откажи</button>
                         </div>
                     </form>
                 </div>
             )}
 
-            {/* List */}
-            {loading ? (
-                <div style={{ color: '#8fa4b8', fontSize: 14 }}>Зареждане...</div>
-            ) : items.length === 0 ? (
-                <div style={{ color: '#8fa4b8', fontSize: 14 }}>Няма добавени отзиви. Добавете или стартирайте seed скрипта.</div>
-            ) : (
+            {loading ? <div style={muted}>Зареждане...</div>
+            : items.length === 0 ? <div style={muted}>Няма добавени отзиви.</div>
+            : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {items.map((t, idx) => (
-                        <div key={t._id} style={{ background: '#1e293b', borderRadius: 10, padding: 20, display: 'flex', gap: 16, alignItems: 'flex-start', outline: idx < 3 ? '1px solid rgba(249,115,22,0.2)' : 'none' }}>
-                            <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: '50%', background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f97316', fontSize: 14, fontWeight: 700 }}>
+                        <div key={t._id} style={{ background: '#fff', border: `1.5px solid ${idx < 3 ? 'rgba(240,116,32,0.3)' : '#e2e8f0'}`, borderRadius: 12, padding: 20, display: 'flex', gap: 16, alignItems: 'flex-start', boxShadow: '0 1px 4px rgba(15,31,61,0.06)' }}>
+                            <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: '50%', background: 'rgba(240,116,32,0.1)', border: `1.5px solid rgba(240,116,32,0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: ORANGE, fontSize: 14, fontWeight: 700, fontFamily: FH }}>
                                 {t.initials}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                                     <div style={{ display: 'flex', gap: 2 }}>
-                                        {[1,2,3,4,5].map(i => (
-                                            <span key={i} style={{ fontSize: 14, color: i <= (t.stars ?? 5) ? '#f97316' : '#334155' }}>★</span>
-                                        ))}
+                                        {[1,2,3,4,5].map(i => <span key={i} style={{ fontSize: 14, color: i <= (t.stars ?? 5) ? ORANGE : '#e2e8f0' }}>★</span>)}
                                     </div>
-                                    {idx < 3 && <span style={{ fontSize: 10, color: '#f97316', fontWeight: 700, letterSpacing: '0.06em' }}>ПОКАЗВА СЕ</span>}
+                                    {idx < 3 && (
+                                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(240,116,32,0.1)', border: '1px solid rgba(240,116,32,0.3)', borderRadius: 50, padding: '2px 8px', fontSize: 10, color: ORANGE, fontWeight: 700, fontFamily: FH, letterSpacing: '0.06em' }}>
+                                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            ВИДИМ НА САЙТА
+                                        </span>
+                                    )}
                                 </div>
-                                <p style={{ color: '#dae4ee', fontSize: 13, margin: '0 0 6px', lineHeight: 1.5 }}>"{t.text}"</p>
-                                <p style={{ color: '#f97316', fontSize: 13, fontWeight: 700, margin: '0 0 2px' }}>{t.name}</p>
-                                <p style={{ color: '#8fa4b8', fontSize: 12, margin: 0 }}>{t.subtitle}</p>
+                                <p style={{ color: '#334155', fontSize: 13, fontFamily: FH, margin: '0 0 6px', lineHeight: 1.6 }}>"{t.text}"</p>
+                                <p style={{ color: ORANGE, fontSize: 13, fontWeight: 700, fontFamily: FH, margin: '0 0 2px' }}>{t.name}</p>
+                                <p style={{ color: '#94a3b8', fontSize: 12, fontFamily: FH, margin: 0 }}>{t.subtitle}</p>
                             </div>
                             <div style={{ flexShrink: 0, display: 'flex', gap: 8 }}>
-                                <button onClick={() => openEdit(t)} style={{ background: '#334155', border: 'none', borderRadius: 6, padding: '6px 12px', color: '#94a3b8', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                                    Редактирай
-                                </button>
-                                <button onClick={() => void remove(t._id)} style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 6, padding: '6px 12px', color: '#fca5a5', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                                    Изтрий
-                                </button>
+                                <button onClick={() => openEdit(t)} style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: 6, padding: '6px 12px', color: '#475569', fontSize: 12, fontWeight: 600, fontFamily: FH, cursor: 'pointer' }}>Редактирай</button>
+                                <button onClick={() => void remove(t._id)} style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, padding: '6px 12px', color: '#dc2626', fontSize: 12, fontWeight: 600, fontFamily: FH, cursor: 'pointer' }}>Изтрий</button>
                             </div>
                         </div>
                     ))}

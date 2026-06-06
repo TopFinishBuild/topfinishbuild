@@ -4,8 +4,8 @@ import { fetchSettings } from '../../api/settingsCache';
 const SERVICES_LINKS = ['Баня / WC', 'Настилки', 'Боядисване', 'ВиК Инсталации', 'Електро Работи', 'Гипсокартон'];
 const NAV_LINKS: [string, string][] = [
     ['За нас',    '#about'],
-    ['Услуги',    '#services'],
-    ['Преди/След','#before-after'],
+    ['Услуги',    '#uslugi'],
+    ['Преди/След','#predi-i-sled'],
     ['Галерия',   '#gallery'],
     ['Контакт',   '#calendar'],
 ];
@@ -101,7 +101,7 @@ export default function Footer({ onNavigate }: FooterProps = {}) {
                         <div className="footer__col-title">Услуги</div>
                         <ul className="footer__links">
                             {SERVICES_LINKS.map(l => (
-                                <li key={l}><a href="#services">{l}</a></li>
+                                <li key={l}><a href="#uslugi">{l}</a></li>
                             ))}
                         </ul>
                     </div>

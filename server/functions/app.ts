@@ -10,7 +10,7 @@ import {
     reorderGallery,
 } from './gallery.js';
 import { getCalendar, setCalendar } from './calendar.js';
-import { listCategories, addCategory, deleteCategory, reorderCategories } from './categories.js';
+import { listCategories, addCategory, deleteCategory, reorderCategories, renameCategory } from './categories.js';
 import { getSettings, updateSettings } from './settings.js';
 import { listPartners, uploadPartner, deletePartner } from './partners.js';
 import { listTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from './testimonials.js';
@@ -44,8 +44,9 @@ app.post('/api/contact/send', sendContactEmail);
 // Categories — public read, admin write
 app.get('/api/categories', listCategories);
 app.post('/api/categories', authorizeAdmin, addCategory);
-app.delete('/api/categories/:id', authorizeAdmin, deleteCategory);
 app.put('/api/categories/reorder', authorizeAdmin, reorderCategories);
+app.put('/api/categories/:id', authorizeAdmin, renameCategory);
+app.delete('/api/categories/:id', authorizeAdmin, deleteCategory);
 
 // Gallery — public read, admin write
 app.get('/api/gallery', listGallery);

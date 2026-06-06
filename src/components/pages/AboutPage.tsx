@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { PageHero } from '../common/PageHero';
+import { SectionLabel } from '../common/SectionLabel';
 
 const NAVY   = '#0f1f3d';
 const ORANGE = '#f07420';
@@ -46,16 +48,11 @@ export default function AboutPage({ onNavigate }: AboutPageProps) {
   return (
     <div style={{ background: '#fff' }}>
 
-      {/* Hero */}
-      <div style={{ background: NAVY, padding: isMobile ? '60px 24px 50px' : '100px 48px 80px', textAlign: 'center' }}>
-        <span className="section-label" style={{ marginBottom: 12, display: 'inline-block' }}>За нас</span>
-        <h1 className="section-title" style={{ color: '#fff', marginTop: 10, fontSize: isMobile ? 36 : 54 }}>
-          TOPFINISH <em>BUILD</em>
-        </h1>
-        <p style={{ fontFamily: FH, fontSize: isMobile ? 16 : 19, color: 'rgba(255,255,255,0.75)', maxWidth: 620, margin: '20px auto 0', lineHeight: 1.8 }}>
-          Вашият надежден партньор за довършителни ремонтни дейности в жилищни, офис и индустриални пространства.
-        </p>
-      </div>
+      <PageHero
+        label="За нас"
+        title={<>TOPFINISH <em>BUILD</em></>}
+        description="Вашият надежден партньор за довършителни ремонтни дейности в жилищни, офис и индустриални пространства."
+      />
 
       {/* Main content */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: isMobile ? '60px 24px' : '100px 48px' }}>
@@ -63,7 +60,7 @@ export default function AboutPage({ onNavigate }: AboutPageProps) {
         {/* Story section */}
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 48 : 80, alignItems: 'center', marginBottom: isMobile ? 60 : 100 }}>
           <div>
-            <span className="section-label">Нашата история</span>
+            <SectionLabel>Нашата история</SectionLabel>
             <h2 className="section-title" style={{ marginTop: 10 }}>
               ПОВЕЧЕ ОТ <em>12 ГОДИНИ</em><br/>В БРАНША
             </h2>
@@ -92,7 +89,7 @@ export default function AboutPage({ onNavigate }: AboutPageProps) {
         {/* What we do */}
         <div style={{ marginBottom: isMobile ? 60 : 100 }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <span className="section-label">Какво правим</span>
+            <SectionLabel>Какво правим</SectionLabel>
             <h2 className="section-title" style={{ marginTop: 10 }}>
               РЕМОНТНИ РЕШЕНИЯ ЗА<br/><em>ВСЕКИ ВИД ПРОСТРАНСТВО</em>
             </h2>
@@ -116,20 +113,19 @@ export default function AboutPage({ onNavigate }: AboutPageProps) {
         {/* Team */}
         <div style={{ marginBottom: isMobile ? 60 : 100 }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <span className="section-label">Екипът</span>
+            <SectionLabel>Екипът</SectionLabel>
             <h2 className="section-title" style={{ marginTop: 10 }}>
-              ХОРАТА ЗАД<br/><em>TOPFINISH BUILD</em>
+              ЛИЦЕТО ЗАД<br/><em>TOPFINISH BUILD</em>
             </h2>
             <div className="divider" />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 32, maxWidth: 800, margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
             {[
-              { name: 'инж. Михаил Василев', role: 'Съосновател & Технически ръководител', img: '/team/mihail-vasilev.jpg' },
-              { name: 'Кирил Янков',         role: 'Съосновател & Управител',               img: '/team/kiril-yankov.jpg'   },
-            ].map(p => (
-              <div key={p.name} style={{ textAlign: 'center' }}>
+              { name: 'инж. Михаил Василев', role: 'Съосновател & Технически ръководител', img: '/misho.webp' },
+             ].map(p => (
+              <div key={p.name} style={{ textAlign: 'center', width: isMobile ? '100%' : 360 }}>
                 <div style={{ width: '100%', aspectRatio: '4/5', background: '#f1f5f9', borderRadius: 16, overflow: 'hidden', marginBottom: 20, border: '1px solid #e5e7eb' }}>
-                  <img src={p.img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }}
+                  <img src={p.img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
                     onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                 </div>
                 <h3 style={{ fontFamily: FH, fontSize: 20, fontWeight: 800, color: NAVY, margin: '0 0 6px' }}>{p.name}</h3>
@@ -142,7 +138,7 @@ export default function AboutPage({ onNavigate }: AboutPageProps) {
         {/* Values */}
         <div style={{ marginBottom: isMobile ? 60 : 100 }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <span className="section-label">Нашите ценности</span>
+            <SectionLabel>Нашите ценности</SectionLabel>
             <h2 className="section-title" style={{ marginTop: 10 }}>
               ЗАЩО ДА ИЗБЕРЕТЕ<br/><em>TOPFINISH BUILD</em>
             </h2>

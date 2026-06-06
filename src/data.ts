@@ -50,11 +50,11 @@ export const MONTH_NAMES = ['Януари','Февруари','Март','Апр
 export const DAY_NAMES   = ['ПН','ВТ','СР','ЧТ','ПТ','СБ','НД'];
 
 export const NAV_LINKS: [string, string][] = [
-  ['#services',     'Услуги'],
+  ['#uslugi',       'Услуги'],
   ['#predi-i-sled', 'Преди/След'],
   ['#gallery',      'Галерия'],
-  ['#calendar',     'Календар'],
-  ['#partners',     'Партньори'],
+  ['#partniori',    'Партньори'],
   ['#prices',       'Цени'],
+  ['#calendar',     'Календар'],
   ['#about',        'За нас'],
 ];

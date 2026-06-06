@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { beforeImage, afterImage } from '../../data';
 import BeforeAfterSlider from './BeforeAfterSlider';
 import { api } from '../../api/client';
+import { SectionLabel } from '../common/SectionLabel';
 
 interface Pair {
     _id: string;
@@ -31,7 +32,7 @@ export default function BeforeAfter({ onNavigate }: Props) {
             <div className="container">
 
                 <div className="before-after__header">
-                    <span className="section-label">Нашата работа</span>
+                    <SectionLabel>Нашата работа</SectionLabel>
                     <h2 className="section-title">Преди и След</h2>
                     <div className="divider" />
                     <p style={{ fontFamily: 'var(--d7-fb)', fontSize: 16, color: 'var(--d7-gray)', marginTop: 8 }}>
