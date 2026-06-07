@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { fetchSettings } from '../../api/settingsCache';
 
-const SERVICES_LINKS = ['Баня / WC', 'Настилки', 'Боядисване', 'ВиК Инсталации', 'Електро Работи', 'Гипсокартон'];
+const SERVICES_LINKS = ['Баня / WC', 'Настилки', 'Боядисване', 'ВиК Инсталации', 'Електро Инсталации', 'Гипсокартон', 'Мазилки', 'Изолация'];
 const NAV_LINKS: [string, string][] = [
     ['За нас',    '#about'],
     ['Услуги',    '#uslugi'],
     ['Преди/След','#predi-i-sled'],
     ['Галерия',   '#gallery'],
-    ['Контакт',   '#calendar'],
+    ['Контакт',   '#contact-form'],
 ];
 
 const SOCIALS = [

@@ -38,20 +38,19 @@ export const uploadToS3WithVariants = async (
 ): Promise<S3UploadWithVariantsResult> => {
     const { bucket, region } = cfg();
     const buffer = Buffer.from(file.base64.replace(/^data:.+;base64,/, ''), 'base64');
-    const id  = uuidv4();
-    const ext = file.name.split('.').pop() || 'jpg';
+    const id = uuidv4();
 
     const [bufFull, bufSmall] = await Promise.all([
-        sharp(buffer).resize(sizes.full,  null, { withoutEnlargement: true }).toBuffer(),
-        sharp(buffer).resize(sizes.small, null, { withoutEnlargement: true }).toBuffer(),
+        sharp(buffer).resize(sizes.full,  null, { withoutEnlargement: true }).webp({ quality: 85 }).toBuffer(),
+        sharp(buffer).resize(sizes.small, null, { withoutEnlargement: true }).webp({ quality: 82 }).toBuffer(),
     ]);
 
-    const key      = `${folder}/${id}.${ext}`;
-    const keySmall = `${folder}/${id}_small.${ext}`;
+    const key      = `${folder}/${id}.webp`;
+    const keySmall = `${folder}/${id}_small.webp`;
 
     await Promise.all([
-        s3().send(new PutObjectCommand({ Bucket: bucket, Key: key,      Body: bufFull,  ContentType: file.type })),
-        s3().send(new PutObjectCommand({ Bucket: bucket, Key: keySmall, Body: bufSmall, ContentType: file.type })),
+        s3().send(new PutObjectCommand({ Bucket: bucket, Key: key,      Body: bufFull,  ContentType: 'image/webp' })),
+        s3().send(new PutObjectCommand({ Bucket: bucket, Key: keySmall, Body: bufSmall, ContentType: 'image/webp' })),
     ]);
 
     const base = `https://${bucket}.s3.${region}.amazonaws.com`;

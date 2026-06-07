@@ -14,7 +14,12 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
   const handleLink = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     setMenuOpen(false);
-    onNavigate?.(href);
+    // On desktop Контакт scrolls to the full section; on mobile directly to form
+    if (href === '#contact-form' && window.innerWidth >= 768) {
+      onNavigate?.('#calendar');
+    } else {
+      onNavigate?.(href);
+    }
   };
 
   const isActive = (href: string) => {
@@ -58,9 +63,9 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
             );
           })}
           <a
-            href="#calendar"
+            href="#contact-form"
             className="btn-primary"
-            onClick={e => handleLink(e, '#calendar')}
+            onClick={e => handleLink(e, '#contact-form')}
             style={{ padding: '0.6rem 1.5rem', fontSize: '0.9375rem' }}
           >
             Контакт
@@ -93,7 +98,7 @@ export default function Header({ onNavigate, activePage = 'home', activeSection 
               >{label}</a>
             );
           })}
-          <a href="#calendar" onClick={e => handleLink(e, '#calendar')} className="btn-primary" style={{ textAlign: 'center', justifyContent: 'center', marginTop: '0.5rem' }}>
+          <a href="#contact-form" onClick={e => handleLink(e, '#contact-form')} className="btn-primary" style={{ textAlign: 'center', justifyContent: 'center', marginTop: '0.5rem' }}>
             Контакт
           </a>
         </div>

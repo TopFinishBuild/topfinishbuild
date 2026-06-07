@@ -8,8 +8,10 @@ const SERVICES = [
   { icon: 'layers', title: 'Настилки', desc: 'Полагане на ламинат, паркет, гранитогрес и всякакъв вид подови настилки.' },
   { icon: 'brush', title: 'Боядисване', desc: 'Прецизно боядисване на стени и тавани — разнообразие от бои и техники.' },
   { icon: 'wrench', title: 'ВиК Инсталации', desc: 'Изграждане и ремонт на водопроводни и канализационни инсталации.' },
-  { icon: 'zap', title: 'Електро Работи', desc: 'Електрически инсталации, табла и разклонения от сертифицирани майстори.' },
+  { icon: 'zap', title: 'Електро Инсталации', desc: 'Електрически инсталации, табла и разклонения от сертифицирани майстори.' },
   { icon: 'grid', title: 'Гипсокартон', desc: 'Монтаж на гипсокартонени стени, тавани и декоративни ниши.' },
+  { icon: 'grid', title: 'Мазилки', desc: 'Прецизно мазилване на стени и тавани - разнообразие от мазилки и техники.' },
+  { icon: 'grid', title: 'Изолация', desc: 'Топло и шумоизолация на стени, тавани и подове с висококачествени материали.' },
 ];
 
 const N = SERVICES.length;
@@ -91,7 +93,7 @@ function MobileCarousel() {
 /* ── Desktop grid ── */
 function DesktopGrid() {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 24 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 24 }}>
       {SERVICES.map(s => (
         <ServiceCard key={s.title} icon={s.icon} title={s.title} desc={s.desc} noHover={false} />
       ))}
