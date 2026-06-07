@@ -42,7 +42,7 @@ export type Page = 'home' | 'pricing' | 'gallery' | 'about' | 'beforeafter' | 'a
 interface Route { page: Page; slug?: string; }
 
 // Scroll-only anchors — these never change the URL
-const SCROLL_ANCHORS = new Set(['#uslugi', '#partniori', '#contact', '#calendar', '#about-preview']);
+const SCROLL_ANCHORS = new Set(['#uslugi', '#partniori', '#contact', '#calendar', '#contact-form', '#about-preview']);
 const SECTION_IDS    = ['#uslugi', '#calendar', '#partniori'];
 
 function parsePathname(path: string): Route {

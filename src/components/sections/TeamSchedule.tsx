@@ -96,7 +96,7 @@ export default function TeamSchedule() {
           </div>
 
           {/* Form panel — light */}
-          <div style={panel}>
+          <div id="contact-form" style={{ ...panel, scrollMarginTop: 80 }}>
             <div style={{ fontFamily:FH, fontSize:22, fontWeight:700, color:'#0f1f3d', marginBottom:8 }}>Изпратете запитване</div>
             <p style={{ fontFamily:FB, fontSize:17, color:'#6b7280', marginBottom:24 }}>
               Свържете се с нас за безплатна консултация и оценка на вашия проект.
