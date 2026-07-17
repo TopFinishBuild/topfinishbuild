@@ -6,6 +6,11 @@
    Всички стилове са с префикс .d7- за да няма конфликти
    ============================================================ */
 
+/* ── Anchor scroll offset (sticky header ~65px) ── */
+html {
+  scroll-padding-top: 72px;
+}
+
 /* ── Sticky footer layout ── */
 .app-root {
   display: flex;

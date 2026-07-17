@@ -41,8 +41,8 @@ export const uploadToS3WithVariants = async (
     const id = uuidv4();
 
     const [bufFull, bufSmall] = await Promise.all([
-        sharp(buffer).resize(sizes.full,  null, { withoutEnlargement: true }).webp({ quality: 85 }).toBuffer(),
-        sharp(buffer).resize(sizes.small, null, { withoutEnlargement: true }).webp({ quality: 82 }).toBuffer(),
+        sharp(buffer).rotate().resize(sizes.full,  null, { withoutEnlargement: true }).webp({ quality: 85 }).toBuffer(),
+        sharp(buffer).rotate().resize(sizes.small, null, { withoutEnlargement: true }).webp({ quality: 82 }).toBuffer(),
     ]);
 
     const key      = `${folder}/${id}.webp`;

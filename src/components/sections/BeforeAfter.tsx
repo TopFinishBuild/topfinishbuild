@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { beforeImage, afterImage } from '../../data';
 import BeforeAfterSlider from './BeforeAfterSlider';
 import { api } from '../../api/client';
 import { SectionLabel } from '../common/SectionLabel';
@@ -24,9 +23,6 @@ export default function BeforeAfter({ onNavigate }: Props) {
             .catch(() => {});
     }, []);
 
-    const beforeUrl = pair?.beforeUrl ?? beforeImage;
-    const afterUrl  = pair?.afterUrl  ?? afterImage;
-
     return (
         <section id="before-after" className="before-after">
             <div className="container">
@@ -40,7 +36,10 @@ export default function BeforeAfter({ onNavigate }: Props) {
                     </p>
                 </div>
 
-                <BeforeAfterSlider beforeUrl={beforeUrl} afterUrl={afterUrl} />
+                {pair
+                    ? <BeforeAfterSlider beforeUrl={pair.beforeUrl} afterUrl={pair.afterUrl} />
+                    : <div className="before-after__slider" style={{ background: '#eef1f5' }} aria-hidden="true" />
+                }
 
                 <p className="before-after__hint">Плъзнете наляво и надясно за да видите разликата</p>
 
