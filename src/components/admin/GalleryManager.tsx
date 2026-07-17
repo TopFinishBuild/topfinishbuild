@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../../api/client';
+import { prepareImage } from '../../utils/image';
 import { fetchCategories, invalidateCategoriesCache, type Category } from '../../api/categoryCache';
 
 interface GalleryImage {
@@ -248,16 +249,12 @@ export default function GalleryManager() {
 
     // ── File upload ─────────────────────────────────────────────────────────
 
-    const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => {
-            const base64 = ev.target?.result as string;
-            setPreview(base64);
-            setFileData({ base64, name: file.name, type: file.type });
-        };
-        reader.readAsDataURL(file);
+        const data = await prepareImage(file);
+        setPreview(data.base64);
+        setFileData(data);
     };
 
     const upload = async (e: React.FormEvent) => {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../../api/client';
+import { prepareImage } from '../../utils/image';
 import BeforeAfterSlider from '../sections/BeforeAfterSlider';
 
 interface Pair {
@@ -16,14 +17,10 @@ import { inp, lbl, card, sectionTitle, muted, successBox, errorBox, primaryBtn, 
 
 function ImagePicker({ label, preview, onFile }: { label: string; preview: string | null; onFile: (f: { base64: string; name: string; type: string }) => void }) {
     const ref = useRef<HTMLInputElement>(null);
-    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => {
-            onFile({ base64: ev.target?.result as string, name: file.name, type: file.type });
-        };
-        reader.readAsDataURL(file);
+        onFile(await prepareImage(file));
     };
     return (
         <div style={{ flex: 1 }}>

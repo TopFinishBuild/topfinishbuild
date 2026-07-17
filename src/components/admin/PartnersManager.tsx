@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../../api/client';
+import { prepareImage } from '../../utils/image';
 import { inp, lbl, card, sectionTitle, muted, successBox, errorBox, primaryBtn, NAVY, FH } from './theme';
 
 interface Partner { _id: string; name: string; url: string; urlSmall?: string; }
@@ -18,11 +19,10 @@ export default function PartnersManager() {
     const load = async () => { const res = await api.get<{ partners: Partner[] }>('/partners'); setPartners(res.partners); };
     useEffect(() => { load().catch(() => setError('Грешка при зареждане')).finally(() => setLoading(false)); }, []);
 
-    const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => { const b = ev.target?.result as string; setPreview(b); setFileData({ base64: b, name: file.name, type: file.type }); };
-        reader.readAsDataURL(file);
+        const data = await prepareImage(file, { maxDim: 600 });
+        setPreview(data.base64); setFileData(data);
     };
 
     const upload = async (e: React.FormEvent) => {
