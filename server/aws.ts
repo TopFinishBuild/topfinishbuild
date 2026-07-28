@@ -2,6 +2,7 @@ import { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } fro
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
+import { getWatermarkSettings, buildOverlay, renderedSize } from './watermark.js';
 import type { S3UploadResult, S3UploadWithVariantsResult } from './types.js';
 
 const cfg = () => ({
@@ -34,15 +35,30 @@ export const uploadToS3 = async (key: string, body: Buffer, contentType: string)
 export const uploadToS3WithVariants = async (
     file: { base64: string; name: string; type: string },
     folder = 'gallery',
-    sizes = { full: 800, small: 300 }
+    sizes = { full: 800, small: 300 },
+    opts: { watermark?: boolean } = {}
 ): Promise<S3UploadWithVariantsResult> => {
     const { bucket, region } = cfg();
     const buffer = Buffer.from(file.base64.replace(/^data:.+;base64,/, ''), 'base64');
     const id = uuidv4();
 
+    const wm = opts.watermark === false ? null : await getWatermarkSettings();
+    const meta = wm?.enabled ? await sharp(buffer).metadata() : null;
+
+    // Watermark is sized per variant so it stays proportional on both.
+    const render = async (targetWidth: number, quality: number): Promise<Buffer> => {
+        let pipeline = sharp(buffer).rotate().resize(targetWidth, null, { withoutEnlargement: true });
+        if (wm && meta) {
+            const size = renderedSize(meta, targetWidth);
+            const overlay = size && await buildOverlay(size.width, size.height, wm);
+            if (overlay) pipeline = pipeline.composite([overlay]);
+        }
+        return pipeline.webp({ quality }).toBuffer();
+    };
+
     const [bufFull, bufSmall] = await Promise.all([
-        sharp(buffer).rotate().resize(sizes.full,  null, { withoutEnlargement: true }).webp({ quality: 85 }).toBuffer(),
-        sharp(buffer).rotate().resize(sizes.small, null, { withoutEnlargement: true }).webp({ quality: 82 }).toBuffer(),
+        render(sizes.full,  85),
+        render(sizes.small, 82),
     ]);
 
     const key      = `${folder}/${id}.webp`;
@@ -55,6 +71,17 @@ export const uploadToS3WithVariants = async (
 
     const base = `https://${bucket}.s3.${region}.amazonaws.com`;
     return { key, keySmall, url: `${base}/${key}`, urlSmall: `${base}/${keySmall}` };
+};
+
+/** Stored as PNG so the logo keeps a clean alpha channel for compositing. */
+export const uploadWatermarkLogo = async (file: { base64: string }): Promise<S3UploadResult> => {
+    const { bucket, region } = cfg();
+    const buffer = Buffer.from(file.base64.replace(/^data:.+;base64,/, ''), 'base64');
+    const png = await sharp(buffer).rotate().resize(600, null, { withoutEnlargement: true }).png().toBuffer();
+
+    const key = `watermark/${uuidv4()}.png`;
+    await s3().send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: png, ContentType: 'image/png' }));
+    return { key, url: `https://${bucket}.s3.${region}.amazonaws.com/${key}` };
 };
 
 export const deleteFromS3 = async (key: string): Promise<void> => {

@@ -8,8 +8,9 @@ import PartnersManager from '../admin/PartnersManager';
 import ReviewsManager from '../admin/ReviewsManager';
 import ContactSettings from '../admin/ContactSettings';
 import BeforeAfterManager from '../admin/BeforeAfterManager';
+import WatermarkManager from '../admin/WatermarkManager';
 
-type Tab = 'gallery' | 'beforeafter' | 'calendar' | 'partners' | 'reviews' | 'contact' | 'security';
+type Tab = 'gallery' | 'beforeafter' | 'calendar' | 'partners' | 'reviews' | 'watermark' | 'contact' | 'security';
 
 interface Props { onNavigate: (href: string) => void; }
 
@@ -23,6 +24,7 @@ const NAV_ITEMS: { tab: Tab; label: string; icon: string }[] = [
     { tab: 'calendar',    label: 'Календар',  icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
     { tab: 'partners',    label: 'Партньори', icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
     { tab: 'reviews',     label: 'Отзиви',    icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
+    { tab: 'watermark',   label: 'Воден знак', icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8"/><path d="M8 12h8"/>' },
     { tab: 'contact',     label: 'Контакти',  icon: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.55 3.49 2 2 0 0 1 3.55 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>' },
     { tab: 'security',    label: 'Сигурност', icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' },
 ];
@@ -135,6 +137,7 @@ export default function AdminPage({ onNavigate: _onNavigate }: Props) {
                     {tab === 'calendar'    && <CalendarManager />}
                     {tab === 'partners'    && <PartnersManager />}
                     {tab === 'reviews'     && <ReviewsManager />}
+                    {tab === 'watermark'   && <WatermarkManager />}
                     {tab === 'contact'     && <ContactSettings />}
                     {tab === 'security'    && <SecurityManager />}
                 </main>

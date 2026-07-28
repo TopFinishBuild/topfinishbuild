@@ -2,6 +2,7 @@ import type { Filter, Document } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import type { Request, Response } from 'express';
 import MongoDB from './db.js';
+import { nextOrder } from './order.js';
 import { uploadToS3WithVariants, deleteFromS3 } from '../aws.js';
 import type { BeforeAfterPair } from '../types.js';
 
@@ -35,15 +36,7 @@ export async function createBeforeAfterPair(req: Request, res: Response): Promis
             uploadToS3WithVariants(afterFile, 'beforeafter', { full: 1200, small: 600 }),
         ]);
 
-        const last = await MongoDB.collection('beforeafter')
-            .find({})
-            .sort({ order: -1 })
-            .limit(1)
-            .toArray();
-        const nextOrder = last.length > 0 && (last[0] as any).order != null
-            ? (last[0] as any).order + 1
-            : 0;
-
+        const order = await nextOrder('beforeafter');
         const pair: BeforeAfterPair & { _id: string } = {
             _id: uuidv4(),
             title,
@@ -55,7 +48,7 @@ export async function createBeforeAfterPair(req: Request, res: Response): Promis
             afterKeySmall: afterResult.keySmall,
             afterUrl: afterResult.url,
             afterUrlSmall: afterResult.urlSmall,
-            order: nextOrder,
+            order,
             createdAt: new Date(),
         };
 

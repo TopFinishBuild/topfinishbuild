@@ -20,7 +20,7 @@ const getDatabase = (): Db => {
 const MongoDB = new Proxy({} as Db, {
     get(_target, prop: string | symbol) {
         const db = getDatabase();
-        const value = (db as any)[prop];
+        const value = Reflect.get(db, prop) as unknown;
         return typeof value === 'function' ? value.bind(db) : value;
     },
 });

@@ -77,6 +77,37 @@ export interface User {
     role: 'admin' | 'editor';
 }
 
+export type WatermarkPosition =
+    | 'top-left'    | 'top-center'    | 'top-right'
+    | 'middle-left' | 'center'        | 'middle-right'
+    | 'bottom-left' | 'bottom-center' | 'bottom-right';
+
+export interface WatermarkSettings {
+    enabled: boolean;
+    /** S3 key of the logo, absent until one is uploaded */
+    key?: string;
+    url?: string;
+    position: WatermarkPosition;
+    /** 0..1 */
+    opacity: number;
+    /** logo width as % of the image width */
+    size: number;
+    /** edge padding as % of the image width */
+    margin: number;
+}
+
+/** The single `settings` document, always `_id: 'main'`. */
+export interface SiteSettings {
+    _id: string;
+    calendarVisible?: boolean;
+    phone1?: string;
+    phone2?: string;
+    email1?: string;
+    email2?: string;
+    watermark?: WatermarkSettings;
+    updatedAt?: Date;
+}
+
 export interface S3UploadResult {
     key: string;
     url: string;

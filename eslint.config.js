@@ -6,7 +6,8 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // `.claude` holds vendored skill docs, not project source.
+  globalIgnores(['dist', 'server/dist', '.claude', '.agent']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -17,6 +18,14 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
+    },
+    rules: {
+      // `_name` is the codebase's marker for a deliberately unused binding.
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      }],
     },
   },
 ])

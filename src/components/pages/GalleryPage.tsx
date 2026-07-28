@@ -35,7 +35,7 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
   useEffect(() => {
     Promise.all([
       fetchCategories(),
-      api.get<{ images: { _id: string; label: string; category: string; url: string; urlSmall?: string; materials?: string; duration?: string }[] }>('/gallery'),
+      api.get<{ images: { _id: string; label: string; category: string; url: string; urlSmall?: string; materials?: string; duration?: string; city?: string; area?: string }[] }>('/gallery'),
     ]).then(([catsData, galleryRes]) => {
       setCats(['Всички', ...catsData.map(c => c.name)]);
       const mapped = galleryRes.images.map(img => ({
@@ -44,10 +44,10 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
         label: img.label,
         src: img.urlSmall ?? img.url,
         srcFull: img.url,
-        duration: (img as any).duration,
-        city: (img as any).city,
-        area: (img as any).area,
-        slug: buildSlug(img.category, img.label, (img as any).city),
+        duration: img.duration,
+        city: img.city,
+        area: img.area,
+        slug: buildSlug(img.category, img.label, img.city),
       }));
       setAllItems(mapped);
 

@@ -7,6 +7,8 @@ export interface UploadFile {
 interface PrepareOpts {
     maxDim?: number;
     quality?: number;
+    /** Use 'image/png' for logos — lossy WebP muddies hard edges and flat color. */
+    format?: 'image/webp' | 'image/png';
 }
 
 const readAsDataURL = (file: File): Promise<string> =>
@@ -31,7 +33,7 @@ const asIs = async (file: File): Promise<UploadFile> => ({
  */
 export async function prepareImage(
     file: File,
-    { maxDim = 1600, quality = 0.85 }: PrepareOpts = {}
+    { maxDim = 1600, quality = 0.85, format = 'image/webp' }: PrepareOpts = {}
 ): Promise<UploadFile> {
     if (/svg|gif/.test(file.type)) return asIs(file);
 
@@ -57,7 +59,7 @@ export async function prepareImage(
     ctx.drawImage(bitmap, 0, 0, w, h);
     bitmap.close();
 
-    const base64 = canvas.toDataURL('image/webp', quality);
+    const base64 = canvas.toDataURL(format, quality);
     // Fallback: browsers without WebP encoding return a PNG data URL.
     const type = base64.startsWith('data:image/webp') ? 'image/webp' : 'image/png';
     const ext = type === 'image/webp' ? 'webp' : 'png';

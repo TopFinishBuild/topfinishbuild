@@ -82,7 +82,8 @@ export default function App() {
             ? requestIdleCallback(prefetchCategories, { timeout: 2000 })
             : setTimeout(prefetchCategories, 0) as unknown as number;
         return () => {
-            typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback(id) : clearTimeout(id);
+            if (typeof cancelIdleCallback !== 'undefined') cancelIdleCallback(id);
+            else clearTimeout(id);
         };
     }, []);
 
