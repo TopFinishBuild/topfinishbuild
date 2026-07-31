@@ -3,15 +3,20 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Request, Response } from 'express';
 import MongoDB from './db.js';
 import { nextOrder } from './order.js';
+import { parseLimit } from './query.js';
 import { uploadToS3WithVariants, deleteFromS3 } from '../aws.js';
 import type { BeforeAfterPair } from '../types.js';
 
-export async function listBeforeAfter(_req: Request, res: Response): Promise<void> {
+export async function listBeforeAfter(req: Request, res: Response): Promise<void> {
     try {
-        const pairs = await MongoDB.collection('beforeafter')
+        const limit = parseLimit(req);
+
+        const cursor = MongoDB.collection('beforeafter')
             .find({})
-            .sort({ order: 1, createdAt: 1 })
-            .toArray();
+            .sort({ order: 1, createdAt: 1 });
+        if (limit) cursor.limit(limit);
+
+        const pairs = await cursor.toArray();
         res.json({ pairs });
     } catch (err) {
         res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });

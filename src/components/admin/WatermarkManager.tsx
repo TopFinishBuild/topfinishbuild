@@ -85,7 +85,7 @@ export default function WatermarkManager() {
     useEffect(() => {
         Promise.all([
             api.get<{ watermark?: Watermark }>('/settings'),
-            api.get<{ images: { url: string; urlSmall?: string }[] }>('/gallery').catch(() => ({ images: [] })),
+            api.get<{ images: { url: string; urlSmall?: string }[] }>('/gallery?limit=1').catch(() => ({ images: [] })),
         ])
             .then(([s, g]) => {
                 if (s.watermark) setWm({ ...DEFAULTS, ...s.watermark });

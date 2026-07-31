@@ -3,14 +3,19 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Request, Response } from 'express';
 import MongoDB from './db.js';
 import { nextOrder } from './order.js';
+import { parseLimit } from './query.js';
 import type { Testimonial } from '../types.js';
 
-export async function listTestimonials(_req: Request, res: Response): Promise<void> {
+export async function listTestimonials(req: Request, res: Response): Promise<void> {
     try {
-        const testimonials = await MongoDB.collection('testimonials')
+        const limit = parseLimit(req);
+
+        const cursor = MongoDB.collection('testimonials')
             .find({})
-            .sort({ order: 1, createdAt: 1 })
-            .toArray();
+            .sort({ order: 1, createdAt: 1 });
+        if (limit) cursor.limit(limit);
+
+        const testimonials = await cursor.toArray();
         res.json({ testimonials });
     } catch (err) {
         res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });

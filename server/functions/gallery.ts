@@ -3,15 +3,20 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Request, Response } from 'express';
 import MongoDB from './db.js';
 import { nextOrder } from './order.js';
+import { parseLimit } from './query.js';
 import { uploadToS3WithVariants, deleteFromS3 } from '../aws.js';
 import type { GalleryImage } from '../types.js';
 
-export async function listGallery(_req: Request, res: Response): Promise<void> {
+export async function listGallery(req: Request, res: Response): Promise<void> {
     try {
-        const images = await MongoDB.collection('gallery')
+        const limit = parseLimit(req);
+
+        const cursor = MongoDB.collection('gallery')
             .find({ deleted: { $ne: true } })
-            .sort({ order: 1, createdAt: -1 })
-            .toArray();
+            .sort({ order: 1, createdAt: -1 });
+        if (limit) cursor.limit(limit);
+
+        const images = await cursor.toArray();
         res.json({ images });
     } catch (err) {
         console.error('List gallery error:', err);
