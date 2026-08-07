@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { SectionLabel } from '../common/SectionLabel';
 
-const IMG = '../../../public/dining-room-with-table-chairs-tv.webp';
+const IMG = '/dining-room-with-table-chairs-tv.webp';
 
 const NAVY = '#0f1f3d';
 const ORANGE = '#f07420';
