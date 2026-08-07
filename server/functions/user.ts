@@ -2,12 +2,22 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import type { Request, Response } from 'express';
-import type { Filter, Document } from 'mongodb';
 import MongoDB from './db.js';
 
 const JWT_SECRET = () => process.env.JWT_SECRET || 'default_secret_key';
 
-type UserDoc = { _id: string; email: string; password: string; name: string; role: string };
+/** `_id` is a string UUID here, not an ObjectId — always reach the collection as
+ *  `collection<UserDoc>('users')` so filters type-check without casts. */
+type UserDoc = {
+    _id: string;
+    email: string;
+    password: string;
+    name: string;
+    role: string;
+    createdAt?: Date;
+};
+
+const users = () => MongoDB.collection<UserDoc>('users');
 
 export async function login(req: Request, res: Response): Promise<void> {
     try {
@@ -17,7 +27,7 @@ export async function login(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        const user = await MongoDB.collection<UserDoc>('users').findOne({ email } as unknown as Filter<UserDoc>);
+        const user = await users().findOne({ email });
         if (!user || !(await bcrypt.compare(password, user.password ?? ''))) {
             res.status(401).json({ error: 'Invalid credentials' });
             return;
@@ -48,15 +58,20 @@ export async function changePassword(req: Request, res: Response): Promise<void>
             return;
         }
 
-        const filter = { _id: req.userId } as unknown as Filter<UserDoc>;
-        const user = await MongoDB.collection<UserDoc>('users').findOne(filter);
+        if (!req.userId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+
+        const filter = { _id: req.userId };
+        const user = await users().findOne(filter);
         if (!user || !(await bcrypt.compare(currentPassword, user.password ?? ''))) {
             res.status(401).json({ error: 'Грешна текуща парола' });
             return;
         }
 
         const hashed = await bcrypt.hash(newPassword, 10);
-        await MongoDB.collection('users').updateOne(filter, { $set: { password: hashed } } as unknown as Document);
+        await users().updateOne(filter, { $set: { password: hashed } });
         res.json({ ok: true });
     } catch (err) {
         console.error('Change password error:', err);
@@ -76,16 +91,16 @@ export async function createUser(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        const existing = await MongoDB.collection('users').findOne({ email } as unknown as Filter<Document>);
+        const existing = await users().findOne({ email });
         if (existing) {
             res.status(409).json({ error: 'Потребител с този имейл вече съществува' });
             return;
         }
 
         const hashed = await bcrypt.hash(password, 10);
-        await MongoDB.collection('users').insertOne({
+        await users().insertOne({
             _id: uuidv4(), email, name, password: hashed, role: 'admin', createdAt: new Date(),
-        } as unknown as Document);
+        });
 
         res.status(201).json({ ok: true, email, name });
     } catch (err) {

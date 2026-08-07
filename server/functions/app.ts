@@ -11,7 +11,7 @@ import {
 } from './gallery.js';
 import { getCalendar, setCalendar } from './calendar.js';
 import { listCategories, addCategory, deleteCategory, reorderCategories, renameCategory } from './categories.js';
-import { getSettings, updateSettings } from './settings.js';
+import { getSettings, updateSettings, updateWatermark, uploadWatermarkImage } from './settings.js';
 import { listPartners, uploadPartner, deletePartner } from './partners.js';
 import { listTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from './testimonials.js';
 import { listBeforeAfter, createBeforeAfterPair, updateBeforeAfterPair, deleteBeforeAfterPair, reorderBeforeAfter } from './beforeafter.js';
@@ -82,6 +82,8 @@ app.put('/api/calendar', authorizeAdmin, setCalendar);
 // Settings — public read, admin write
 app.get('/api/settings', getSettings);
 app.put('/api/settings', authorizeAdmin, updateSettings);
+app.put('/api/settings/watermark', authorizeAdmin, updateWatermark);
+app.post('/api/settings/watermark/logo', authorizeAdmin, uploadWatermarkImage);
 
 if (process.env.NODE_ENV !== 'production') {
     const PORT = Number(process.env.PORT) || 3000;

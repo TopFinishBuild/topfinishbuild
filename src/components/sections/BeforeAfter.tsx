@@ -18,7 +18,7 @@ export default function BeforeAfter({ onNavigate }: Props) {
     const [pair, setPair] = useState<Pair | null>(null);
 
     useEffect(() => {
-        api.get<{ pairs: Pair[] }>('/beforeafter')
+        api.get<{ pairs: Pair[] }>('/beforeafter?limit=1')
             .then(res => { if (res.pairs.length > 0) setPair(res.pairs[0]); })
             .catch(() => {});
     }, []);

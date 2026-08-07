@@ -2,15 +2,21 @@ import type { Filter, Document } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import type { Request, Response } from 'express';
 import MongoDB from './db.js';
+import { nextOrder } from './order.js';
+import { parseLimit } from './query.js';
 import { uploadToS3WithVariants, deleteFromS3 } from '../aws.js';
 import type { BeforeAfterPair } from '../types.js';
 
-export async function listBeforeAfter(_req: Request, res: Response): Promise<void> {
+export async function listBeforeAfter(req: Request, res: Response): Promise<void> {
     try {
-        const pairs = await MongoDB.collection('beforeafter')
+        const limit = parseLimit(req);
+
+        const cursor = MongoDB.collection('beforeafter')
             .find({})
-            .sort({ order: 1, createdAt: 1 })
-            .toArray();
+            .sort({ order: 1, createdAt: 1 });
+        if (limit) cursor.limit(limit);
+
+        const pairs = await cursor.toArray();
         res.json({ pairs });
     } catch (err) {
         res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });
@@ -35,15 +41,7 @@ export async function createBeforeAfterPair(req: Request, res: Response): Promis
             uploadToS3WithVariants(afterFile, 'beforeafter', { full: 1200, small: 600 }),
         ]);
 
-        const last = await MongoDB.collection('beforeafter')
-            .find({})
-            .sort({ order: -1 })
-            .limit(1)
-            .toArray();
-        const nextOrder = last.length > 0 && (last[0] as any).order != null
-            ? (last[0] as any).order + 1
-            : 0;
-
+        const order = await nextOrder('beforeafter');
         const pair: BeforeAfterPair & { _id: string } = {
             _id: uuidv4(),
             title,
@@ -55,7 +53,7 @@ export async function createBeforeAfterPair(req: Request, res: Response): Promis
             afterKeySmall: afterResult.keySmall,
             afterUrl: afterResult.url,
             afterUrlSmall: afterResult.urlSmall,
-            order: nextOrder,
+            order,
             createdAt: new Date(),
         };
 

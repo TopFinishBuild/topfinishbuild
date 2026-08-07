@@ -2,6 +2,7 @@ import type { Filter, Document } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import type { Request, Response } from 'express';
 import MongoDB from './db.js';
+import { nextOrder } from './order.js';
 import { uploadToS3WithVariants, deleteFromS3 } from '../aws.js';
 import type { Partner } from '../types.js';
 
@@ -29,17 +30,10 @@ export async function uploadPartner(req: Request, res: Response): Promise<void> 
             return;
         }
 
-        const result = await uploadToS3WithVariants(file);
+        // Partner logos are third-party brands — never stamp our watermark on them.
+        const result = await uploadToS3WithVariants(file, 'gallery', { full: 800, small: 300 }, { watermark: false });
 
-        const last = await MongoDB.collection('partners')
-            .find({})
-            .sort({ order: -1 })
-            .limit(1)
-            .toArray();
-        const nextOrder = last.length > 0 && (last[0] as any).order != null
-            ? (last[0] as any).order + 1
-            : 0;
-
+        const order = await nextOrder('partners');
         const partner: Partner & { _id: string } = {
             _id: uuidv4(),
             name,
@@ -47,7 +41,7 @@ export async function uploadPartner(req: Request, res: Response): Promise<void> 
             keySmall: result.keySmall,
             url: result.url,
             urlSmall: result.urlSmall,
-            order: nextOrder,
+            order,
             createdAt: new Date(),
         };
 

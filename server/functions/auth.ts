@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 import type { Request, Response, NextFunction } from 'express';
 
 declare global {
+    // Express augmentation only works through a global namespace — no alternative form exists.
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Express {
         interface Request {
             userId?: string;

@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
-  <circle cx="40" cy="40" r="38" fill="#E30613" stroke="#E30613" stroke-width="2"/>
-  <circle cx="40" cy="40" r="28" fill="none" stroke="white" stroke-width="3"/>
-  <text x="40" y="47" font-family="Arial,sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">H</text>
-  <text x="120" y="53" font-family="Arial,sans-serif" font-size="36" font-weight="bold" fill="#E30613" text-anchor="middle">BOSCH</text>
-</svg>

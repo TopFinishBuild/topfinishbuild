@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import ProjectCard from '../sections/ProjectCard';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useSwipe } from '../../hooks/useSwipe';
@@ -35,7 +35,7 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
   useEffect(() => {
     Promise.all([
       fetchCategories(),
-      api.get<{ images: { _id: string; label: string; category: string; url: string; urlSmall?: string; materials?: string; duration?: string }[] }>('/gallery'),
+      api.get<{ images: { _id: string; label: string; category: string; url: string; urlSmall?: string; materials?: string; duration?: string; city?: string; area?: string }[] }>('/gallery'),
     ]).then(([catsData, galleryRes]) => {
       setCats(['Всички', ...catsData.map(c => c.name)]);
       const mapped = galleryRes.images.map(img => ({
@@ -44,10 +44,10 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
         label: img.label,
         src: img.urlSmall ?? img.url,
         srcFull: img.url,
-        duration: (img as any).duration,
-        city: (img as any).city,
-        area: (img as any).area,
-        slug: buildSlug(img.category, img.label, (img as any).city),
+        duration: img.duration,
+        city: img.city,
+        area: img.area,
+        slug: buildSlug(img.category, img.label, img.city),
       }));
       setAllItems(mapped);
 
@@ -67,14 +67,46 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
 
   const items = tab === 'Всички' ? allItems : allItems.filter(i => i.cat === tab);
 
+  const listUrl = (t: string) => t === 'Всички' ? '/remont-snimki' : `/remont-snimki/${toSlug(t)}`;
+
+  /** True while the open lightbox owns a history entry we pushed ourselves. */
+  const pushedEntry = useRef(false);
+
+  // Back/Forward only change the URL — mirror it back into the view.
+  useEffect(() => {
+    const sync = () => {
+      const slug = window.location.pathname.replace(/^\/remont-snimki\/?/, '');
+      if (slug.includes('/')) {
+        const idx = items.findIndex(i => i.slug === slug);
+        setLightbox(idx === -1 ? null : idx);
+        return;
+      }
+      // A bare path or a category slug means: no image open.
+      pushedEntry.current = false;
+      setLightbox(null);
+      const match = slug ? cats.find(c => toSlug(c) === slug) : 'Всички';
+      if (match) setTab(match);
+    };
+    window.addEventListener('popstate', sync);
+    return () => window.removeEventListener('popstate', sync);
+  }, [items, cats]);
+
   const openLightbox = (idx: number) => {
     setLightbox(idx);
     history.pushState(null, '', `/remont-snimki/${items[idx].slug}`);
+    pushedEntry.current = true;
   };
 
   const closeLightbox = () => {
+    // Undo our own entry so Back doesn't land on the image we just closed.
+    if (pushedEntry.current) {
+      pushedEntry.current = false;
+      history.back();          // popstate closes the lightbox
+      return;
+    }
+    // Opened via a deep link — there is nothing of ours to go back to.
     setLightbox(null);
-    history.pushState(null, '', tab === 'Всички' ? '/remont-snimki' : `/remont-snimki/${toSlug(tab)}`);
+    history.replaceState(null, '', listUrl(tab));
   };
 
   const prev = useCallback(() => {
@@ -118,7 +150,7 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
                 className={`gallery-page__filter-btn${tab === c ? ' active' : ''}`}
                 onClick={() => {
                   setTab(c);
-                  history.pushState(null, '', c === 'Всички' ? '/remont-snimki' : `/remont-snimki/${toSlug(c)}`);
+                  history.pushState(null, '', listUrl(c));
                 }}
               >{c}</button>
             ))}

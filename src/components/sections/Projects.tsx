@@ -22,9 +22,9 @@ export default function Projects({ onViewAll, onNavigate }: ProjectsProps) {
     const [items, setItems] = useState<GalleryImage[]>([]);
 
     useEffect(() => {
-        api.get<{ images: GalleryImage[] }>('/gallery').then(res => {
-            setItems(res.images.slice(0, 3));
-        }).catch(() => { /* show empty */ });
+        api.get<{ images: GalleryImage[] }>('/gallery?limit=3')
+            .then(res => setItems(res.images))
+            .catch(() => { /* show empty */ });
     }, []);
 
     return (

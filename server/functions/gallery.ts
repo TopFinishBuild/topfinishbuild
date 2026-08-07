@@ -2,15 +2,21 @@ import type { Filter, Document } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import type { Request, Response } from 'express';
 import MongoDB from './db.js';
+import { nextOrder } from './order.js';
+import { parseLimit } from './query.js';
 import { uploadToS3WithVariants, deleteFromS3 } from '../aws.js';
 import type { GalleryImage } from '../types.js';
 
-export async function listGallery(_req: Request, res: Response): Promise<void> {
+export async function listGallery(req: Request, res: Response): Promise<void> {
     try {
-        const images = await MongoDB.collection('gallery')
+        const limit = parseLimit(req);
+
+        const cursor = MongoDB.collection('gallery')
             .find({ deleted: { $ne: true } })
-            .sort({ order: 1, createdAt: -1 })
-            .toArray();
+            .sort({ order: 1, createdAt: -1 });
+        if (limit) cursor.limit(limit);
+
+        const images = await cursor.toArray();
         res.json({ images });
     } catch (err) {
         console.error('List gallery error:', err);
@@ -50,15 +56,7 @@ export async function uploadGalleryImage(req: Request, res: Response): Promise<v
         const result = await uploadToS3WithVariants(file);
 
         // Assign next order value
-        const last = await MongoDB.collection('gallery')
-            .find({})
-            .sort({ order: -1 })
-            .limit(1)
-            .toArray();
-        const nextOrder = last.length > 0 && (last[0] as any).order != null
-            ? (last[0] as any).order + 1
-            : 0;
-
+        const order = await nextOrder('gallery');
         const image: GalleryImage & { _id: string } = {
             _id: uuidv4(),
             label,
@@ -70,7 +68,7 @@ export async function uploadGalleryImage(req: Request, res: Response): Promise<v
             keySmall: result.keySmall,
             url: result.url,
             urlSmall: result.urlSmall,
-            order: nextOrder,
+            order,
             createdAt: new Date(),
         };
 

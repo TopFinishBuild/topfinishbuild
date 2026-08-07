@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../api/client';
-import { partners as staticPartners } from '../../data';
 import { SectionLabel } from '../common/SectionLabel';
 
 interface Partner {
@@ -10,18 +9,25 @@ interface Partner {
     urlSmall?: string;
 }
 
+const SKELETON_COUNT = 6;
+
 export default function Partners() {
-    const [partners, setPartners] = useState<{ name: string; logo: string }[]>(
-        staticPartners.map(p => ({ name: p.name, logo: p.logo }))
-    );
+    const [partners, setPartners] = useState<{ name: string; logo: string }[]>([]);
+    const [loaded, setLoaded]     = useState(false);
 
     useEffect(() => {
-        api.get<{ partners: Partner[] }>('/partners').then(res => {
-            if (res.partners.length > 0) {
-                setPartners(res.partners.map(p => ({ name: p.name, logo: p.urlSmall ?? p.url })));
-            }
-        }).catch(() => { /* keep static fallback */ });
+        api.get<{ partners: Partner[] }>('/partners')
+            .then(res => setPartners(res.partners.map(p => ({ name: p.name, logo: p.urlSmall ?? p.url }))))
+            .catch(() => { /* leave empty — section hides itself */ })
+            .finally(() => setLoaded(true));
     }, []);
+
+    // Nothing to advertise once we know the list is empty.
+    if (loaded && partners.length === 0) return null;
+
+    const cards = loaded
+        ? [...partners, ...partners, ...partners]
+        : Array.from({ length: SKELETON_COUNT }, () => null);
 
     return (
         <section id="partniori" style={{ padding: '5rem 0', background: '#fff' }}>
@@ -34,10 +40,11 @@ export default function Partners() {
                 </div>
 
                 <div className="partners-outer">
-                    <div className="partners-track">
-                        {[...partners, ...partners, ...partners].map((p, i) => (
-                            <div key={i} className="partner-card">
-                                <img src={p.logo} alt={p.name} />
+                    <div className="partners-track" style={loaded ? undefined : { animation: 'none' }}>
+                        {cards.map((p, i) => (
+                            <div key={i} className="partner-card" aria-hidden={p ? undefined : true}>
+                                {/* Eager: only 5 small logos, and the marquee repeats them — lazy buys nothing here. */}
+                                {p && <img src={p.logo} alt={p.name} decoding="async" />}
                             </div>
                         ))}
                     </div>

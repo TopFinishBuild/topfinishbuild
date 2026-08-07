@@ -2,14 +2,20 @@ import type { Filter, Document } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import type { Request, Response } from 'express';
 import MongoDB from './db.js';
+import { nextOrder } from './order.js';
+import { parseLimit } from './query.js';
 import type { Testimonial } from '../types.js';
 
-export async function listTestimonials(_req: Request, res: Response): Promise<void> {
+export async function listTestimonials(req: Request, res: Response): Promise<void> {
     try {
-        const testimonials = await MongoDB.collection('testimonials')
+        const limit = parseLimit(req);
+
+        const cursor = MongoDB.collection('testimonials')
             .find({})
-            .sort({ order: 1, createdAt: 1 })
-            .toArray();
+            .sort({ order: 1, createdAt: 1 });
+        if (limit) cursor.limit(limit);
+
+        const testimonials = await cursor.toArray();
         res.json({ testimonials });
     } catch (err) {
         res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });
@@ -26,15 +32,7 @@ export async function createTestimonial(req: Request, res: Response): Promise<vo
             return;
         }
 
-        const last = await MongoDB.collection('testimonials')
-            .find({})
-            .sort({ order: -1 })
-            .limit(1)
-            .toArray();
-        const nextOrder = last.length > 0 && (last[0] as any).order != null
-            ? (last[0] as any).order + 1
-            : 0;
-
+        const order = await nextOrder('testimonials');
         const doc: Testimonial & { _id: string } = {
             _id: uuidv4(),
             text: text.trim(),
@@ -42,7 +40,7 @@ export async function createTestimonial(req: Request, res: Response): Promise<vo
             subtitle: subtitle.trim(),
             initials: initials.trim().slice(0, 3).toUpperCase(),
             stars: typeof stars === 'number' && stars >= 1 && stars <= 5 ? stars : 5,
-            order: nextOrder,
+            order,
             createdAt: new Date(),
         };
 

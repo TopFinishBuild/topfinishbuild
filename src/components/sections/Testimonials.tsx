@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../../api/client';
-import { testimonials as staticTestimonials } from '../../data';
 import TestimonialCard from '../sections/TestimonialCard';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { SectionLabel } from '../common/SectionLabel';
@@ -15,28 +14,23 @@ interface Testimonial {
     stars?: number;
 }
 
-const FALLBACK: Testimonial[] = staticTestimonials.slice(0, 3);
-
 export default function Testimonials() {
-    const [all, setAll] = useState<Testimonial[]>(FALLBACK);
+    const [shown, setShown] = useState<Testimonial[]>([]);
     const isMobile = useIsMobile();
     const [idx, setIdx] = useState(0);
     const [dir, setDir] = useState<1 | -1>(1);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     useEffect(() => {
-        api.get<{ testimonials: Testimonial[] }>('/testimonials')
-            .then(res => { if (res.testimonials.length > 0) setAll(res.testimonials); })
-            .catch(() => { /* keep static fallback */ });
+        api.get<{ testimonials: Testimonial[] }>('/testimonials?limit=3')
+            .then(res => setShown(res.testimonials))
+            .catch(() => { /* nothing to show — section stays hidden */ });
     }, []);
-
-    // Always show exactly 3
-    const shown = all.slice(0, 3);
 
     const goTo = (i: number) => { setDir(i > idx ? 1 : -1); setIdx(i); };
 
     const { setNode: swipeSetNode } = useSwipe(
-        () => { if (timerRef.current) clearInterval(timerRef.current); setDir(1);  setIdx(i => (i + 1) % shown.length); },
+        () => { if (timerRef.current) clearInterval(timerRef.current); setDir(1); setIdx(i => (i + 1) % shown.length); },
         () => { if (timerRef.current) clearInterval(timerRef.current); setDir(-1); setIdx(i => (i - 1 + shown.length) % shown.length); }
     );
 
@@ -48,6 +42,11 @@ export default function Testimonials() {
         }, 4000);
         return () => { if (timerRef.current) clearInterval(timerRef.current); };
     }, [isMobile, shown.length]);
+
+    // No reviews yet (or still loading) — the carousel below indexes into the list.
+    if (shown.length === 0) return null;
+
+    const current = shown[Math.min(idx, shown.length - 1)];
 
     return (
         <section id="testimonials" className="testimonials">
@@ -77,11 +76,11 @@ export default function Testimonials() {
                             style={{ animation: `${dir > 0 ? 'slide-from-right' : 'slide-from-left'} 0.32s ease` }}
                         >
                             <TestimonialCard
-                                text={shown[idx].text}
-                                name={shown[idx].name}
-                                subtitle={shown[idx].subtitle}
-                                initials={shown[idx].initials}
-                                stars={shown[idx].stars}
+                                text={current.text}
+                                name={current.name}
+                                subtitle={current.subtitle}
+                                initials={current.initials}
+                                stars={current.stars}
                             />
                         </div>
                     </div>
