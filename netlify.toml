@@ -5,7 +5,10 @@
   functions = "server/functions"
 
 [build.environment]
-  NODE_ENV = "development"
+  # Production build; NPM_FLAGS keeps devDependencies (vite, plugins) installed,
+  # which is the only reason NODE_ENV was set to "development" here before.
+  NODE_ENV = "production"
+  NPM_FLAGS = "--include=dev"
 
 [functions]
   node_bundler = "esbuild"

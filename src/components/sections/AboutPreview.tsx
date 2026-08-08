@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { SectionLabel } from '../common/SectionLabel';
+import { publicSrcSet } from '../../utils/image';
 
 const IMG = '/dining-room-with-table-chairs-tv.webp';
+const IMG_BASE = IMG.replace(/\.webp$/, '');
 
 const NAVY = '#0f1f3d';
 const ORANGE = '#f07420';
@@ -41,7 +43,18 @@ export default function AboutPreview({ onNavigate }: AboutPreviewProps = {}) {
         <div style={{ position: 'relative', marginRight: isMobile ? 0 : 20, marginBottom: isMobile ? 20 : 0 }}>
           <div style={{ background: ORANGE, borderRadius: 20, position: 'absolute', top: 20, left: isMobile ? 10 : 20, right: isMobile ? -10 : -20, bottom: isMobile ? -10 : -20, zIndex: 0 }} />
           <div style={{ position: 'relative', zIndex: 1, borderRadius: 20, overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.12)' }}>
-            <img src={IMG} alt="Работа на обект" style={{ width: '100%', height: isMobile ? 260 : 420, objectFit: 'cover', display: 'block' }} />
+            <img
+              src={`${IMG_BASE}-1200.webp`}
+              srcSet={publicSrcSet(IMG)}
+              // Half of the 1280px container on desktop, full width on mobile
+              sizes="(max-width: 768px) 100vw, 600px"
+              width={4000}
+              height={2667}
+              alt="Работа на обект"
+              loading="lazy"
+              decoding="async"
+              style={{ width: '100%', height: isMobile ? 260 : 420, objectFit: 'cover', display: 'block' }}
+            />
           </div>
           {/* Badge */}
           <div style={{ position: 'absolute', top: -10, right: isMobile ? -10 : -30, zIndex: 2, background: NAVY, color: ORANGE, padding: '12px 16px', borderRadius: 12, textAlign: 'center' }}>
