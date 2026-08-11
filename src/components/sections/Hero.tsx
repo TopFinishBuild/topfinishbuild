@@ -1,12 +1,21 @@
+import { publicSrcSet } from '../../utils/image';
+
 export default function Hero() {
   return (
     <section className="hero-section">
       {/* Background image — WebP with PNG fallback, high priority for LCP */}
       <div className="hero-bg-img">
-        <picture>
-          <source srcSet="/hero.webp" type="image/webp" />
-          <img src="/hero.webp" alt="" fetchPriority="high" loading="eager" decoding="async" />
-        </picture>
+        <img
+          src="/hero-1200.webp"
+          srcSet={publicSrcSet('/hero.webp')}
+          sizes="100vw"
+          width={4000}
+          height={1400}
+          alt=""
+          fetchPriority="high"
+          loading="eager"
+          decoding="async"
+        />
       </div>
 
       {/* Dark gradient overlay */}

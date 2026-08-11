@@ -8,6 +8,9 @@ interface Pair {
     title: string;
     beforeUrl: string;
     afterUrl: string;
+    /** 600px variants the upload already produces — used on small screens */
+    beforeUrlSmall?: string;
+    afterUrlSmall?: string;
 }
 
 interface Props {
@@ -37,7 +40,12 @@ export default function BeforeAfter({ onNavigate }: Props) {
                 </div>
 
                 {pair
-                    ? <BeforeAfterSlider beforeUrl={pair.beforeUrl} afterUrl={pair.afterUrl} />
+                    ? <BeforeAfterSlider
+                        beforeUrl={pair.beforeUrl}
+                        afterUrl={pair.afterUrl}
+                        beforeUrlSmall={pair.beforeUrlSmall}
+                        afterUrlSmall={pair.afterUrlSmall}
+                    />
                     : <div className="before-after__slider" style={{ background: '#eef1f5' }} aria-hidden="true" />
                 }
 

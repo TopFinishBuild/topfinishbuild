@@ -4,6 +4,10 @@ import babel from '@rolldown/plugin-babel'
 
 export default defineConfig(({ mode }): UserConfig => {
 const isProd = mode === 'production'
+// NOTE: @vitejs/plugin-react reads NODE_ENV when it is *imported*, so it cannot
+// be set from here — the build script pins it (cross-env NODE_ENV=production).
+// With NODE_ENV=development the build shipped the DEV jsx runtime: an Error
+// object allocated per JSX element and +130KB of React.
 return ({
   plugins: [
     react(),

@@ -4,6 +4,19 @@ export interface UploadFile {
     type: string;
 }
 
+/** Widths emitted by scripts/optimize-images.mjs for every file in public/ */
+const PUBLIC_WIDTHS = [480, 768, 1200, 1600];
+
+/**
+ * srcSet for a static image in public/ — lets the browser pick a variant that
+ * matches the rendered box instead of always downloading the full-size file.
+ * `/hero.webp` → "/hero-480.webp 480w, /hero-768.webp 768w, …"
+ */
+export const publicSrcSet = (src: string, widths: number[] = PUBLIC_WIDTHS): string => {
+    const base = src.replace(/\.webp$/i, '');
+    return widths.map(w => `${base}-${w}.webp ${w}w`).join(', ');
+};
+
 interface PrepareOpts {
     maxDim?: number;
     quality?: number;

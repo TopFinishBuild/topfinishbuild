@@ -8,6 +8,8 @@ interface Pair {
     title: string;
     beforeUrl: string;
     afterUrl: string;
+    beforeUrlSmall?: string;
+    afterUrlSmall?: string;
 }
 
 export default function BeforeAfterPage() {
@@ -63,7 +65,12 @@ export default function BeforeAfterPage() {
                                         </h2>
                                     )}
 
-                                    <BeforeAfterSlider beforeUrl={pair.beforeUrl} afterUrl={pair.afterUrl} />
+                                    <BeforeAfterSlider
+                                        beforeUrl={pair.beforeUrl}
+                                        afterUrl={pair.afterUrl}
+                                        beforeUrlSmall={pair.beforeUrlSmall}
+                                        afterUrlSmall={pair.afterUrlSmall}
+                                    />
                                     <p className="before-after__hint">Плъзнете наляво и надясно за да видите разликата</p>
                                 </div>
                             ))}

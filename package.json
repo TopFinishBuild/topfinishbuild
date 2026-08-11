@@ -12,7 +12,7 @@
     "start-web": "vite",
     "start-web-host": "vite --host",
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && cross-env NODE_ENV=production vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -33,6 +33,7 @@
     "@vitejs/plugin-react": "^6.0.1",
     "babel-plugin-react-compiler": "^1.0.0",
     "concurrently": "^9.1.2",
+    "cross-env": "^10.1.0",
     "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
