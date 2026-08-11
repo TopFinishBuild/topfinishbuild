@@ -49,6 +49,29 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# One canonical host. The .com alias serves the same build, which Google reads as a
+# duplicate site — 301 it to .bg so the ranking signals land on one domain.
+# Must stay above the SPA fallback: Netlify applies the first matching rule.
+[[redirects]]
+  from = "https://topfinishbuild.com/*"
+  to = "https://topfinishbuild.bg/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.topfinishbuild.com/*"
+  to = "https://topfinishbuild.bg/:splat"
+  status = 301
+  force = true
+
+# Sitemap is generated from the DB (server/functions/sitemap.ts) so every gallery
+# photo gets a URL. force = true: no static file may shadow it.
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/app/sitemap.xml"
+  status = 200
+  force = true
+
 # API routes -> Netlify Functions
 [[redirects]]
   from = "/api/*"

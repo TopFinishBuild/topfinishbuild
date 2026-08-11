@@ -11,7 +11,7 @@ export default function Hero() {
           sizes="100vw"
           width={4000}
           height={1400}
-          alt=""
+          alt="Довършителни ремонти в София – завършен интериор от TopFinish Build"
           fetchPriority="high"
           loading="eager"
           decoding="async"

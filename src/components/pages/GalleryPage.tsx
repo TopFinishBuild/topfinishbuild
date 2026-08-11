@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import ProjectCard from '../sections/ProjectCard';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useSwipe } from '../../hooks/useSwipe';
 import { api } from '../../api/client';
 import { fetchCategories } from '../../api/categoryCache';
 import { toSlug, buildSlug } from '../../utils/slug';
+import { galleryMeta, galleryImageMeta, galleryImageAlt } from '../../utils/seo';
+import { usePageMeta } from '../../hooks/usePageMeta';
 import { PageHero } from '../common/PageHero';
 
 interface GalleryItem {
@@ -135,6 +137,15 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
   }, [lightbox, prev, next]);
 
   const current = lightbox !== null ? items[lightbox] : null;
+
+  // The gallery URL changes on a tab and on an open photo, so it titles itself:
+  // an open image is its own indexable page, a tab is a category listing.
+  const meta = useMemo(
+    () => current ? galleryImageMeta(current) : galleryMeta(tab === 'Всички' ? undefined : tab),
+    [current, tab],
+  );
+  usePageMeta(meta);
+
   const swipe = useSwipe(next, prev);
   const { setNode: swipeSetNode } = swipe;
 
@@ -160,7 +171,7 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
           <div className={`projects__grid${isMobile ? ' projects__grid--mobile' : ''}`}>
             {items.map((it, i) => (
               <div key={`${tab}-${i}`} onClick={() => openLightbox(i)} style={{ cursor: 'pointer' }}>
-                <ProjectCard label={it.label} src={it.src} />
+                <ProjectCard label={it.label} src={it.src} alt={galleryImageAlt(it)} />
               </div>
             ))}
           </div>
@@ -190,7 +201,7 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
             <div style={{ flexShrink: 0, flexGrow: 0, width: isMobile ? '100%' : '65%', height: isMobile ? '49%' : '100%', background: '#000', position: 'relative', overflow: 'hidden' }}>
               <img
                 src={current.srcFull ?? current.src}
-                alt={current.label}
+                alt={galleryImageAlt(current)}
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
               />
               <button

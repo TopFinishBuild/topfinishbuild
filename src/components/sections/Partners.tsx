@@ -44,7 +44,7 @@ export default function Partners() {
                         {cards.map((p, i) => (
                             <div key={i} className="partner-card" aria-hidden={p ? undefined : true}>
                                 {/* Eager: only 5 small logos, and the marquee repeats them — lazy buys nothing here. */}
-                                {p && <img src={p.logo} alt={p.name} decoding="async" />}
+                                {p && <img src={p.logo} alt={`${p.name} – партньор на TopFinish Build`} decoding="async" />}
                             </div>
                         ))}
                     </div>

@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from 'react';
 import './styles/app.css';
 import { prefetchCategories } from './api/categoryCache';
+import { fetchSettings } from './api/settingsCache';
+import { usePageMeta } from './hooks/usePageMeta';
+import { ROUTE_META, setBusinessPhone } from './utils/seo';
 
 // Above-fold — eager (needed for LCP)
 import Hero            from './components/sections/Hero';
@@ -86,6 +89,14 @@ function push(path: string) {
 
 export default function App() {
     const [route, setRoute] = useState<Route>(() => parsePathname(window.location.pathname));
+
+    // <head> + GA page view. Gallery is skipped — it owns its own, see usePageMeta.
+    usePageMeta(route.page === 'gallery' ? null : ROUTE_META[route.page]);
+
+    // Completes the LocalBusiness JSON-LD with the phone from the DB
+    useEffect(() => {
+        fetchSettings().then(s => setBusinessPhone(s.phone1)).catch(() => { /* listing stays without a phone */ });
+    }, []);
 
     // Preload chunks + prefetch data after first paint
     useEffect(() => {

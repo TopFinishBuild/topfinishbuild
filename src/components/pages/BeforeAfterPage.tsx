@@ -70,6 +70,7 @@ export default function BeforeAfterPage() {
                                         afterUrl={pair.afterUrl}
                                         beforeUrlSmall={pair.beforeUrlSmall}
                                         afterUrlSmall={pair.afterUrlSmall}
+                                        title={pair.title}
                                     />
                                     <p className="before-after__hint">Плъзнете наляво и надясно за да видите разликата</p>
                                 </div>

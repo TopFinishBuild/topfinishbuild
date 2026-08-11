@@ -45,6 +45,7 @@ export default function BeforeAfter({ onNavigate }: Props) {
                         afterUrl={pair.afterUrl}
                         beforeUrlSmall={pair.beforeUrlSmall}
                         afterUrlSmall={pair.afterUrlSmall}
+                        title={pair.title}
                     />
                     : <div className="before-after__slider" style={{ background: '#eef1f5' }} aria-hidden="true" />
                 }

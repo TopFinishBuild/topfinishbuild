@@ -5,6 +5,8 @@ interface Props {
     afterUrl: string;
     beforeUrlSmall?: string;
     afterUrlSmall?: string;
+    /** Name of the object — makes the two alt texts describe a real project. */
+    title?: string;
 }
 
 /** Uploads produce a 600px and a 1200px variant — hand both to the browser */
@@ -14,7 +16,8 @@ const variantSet = (full: string, small?: string) =>
 /** The slider is full-width inside a 1280px container */
 const SIZES = '(max-width: 1280px) 100vw, 1200px';
 
-export default function BeforeAfterSlider({ beforeUrl, afterUrl, beforeUrlSmall, afterUrlSmall }: Props) {
+export default function BeforeAfterSlider({ beforeUrl, afterUrl, beforeUrlSmall, afterUrlSmall, title }: Props) {
+    const subject = title ? ` – ${title}` : '';
     const [sliderPos, setSliderPos] = useState(50);
     const [dragging, setDragging]   = useState(false);
     const wrapRef     = useRef<HTMLDivElement>(null);
@@ -78,12 +81,12 @@ export default function BeforeAfterSlider({ beforeUrl, afterUrl, beforeUrlSmall,
             onMouseDown={(e) => { e.preventDefault(); setDragging(true); }}
         >
             <img src={afterUrl} srcSet={variantSet(afterUrl, afterUrlSmall)} sizes={SIZES}
-                width={1200} height={800} alt="След ремонт" loading="lazy" decoding="async"
+                width={1200} height={800} alt={`След ремонт${subject} – TopFinish Build`} loading="lazy" decoding="async"
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
 
             <div style={{ position: 'absolute', inset: 0, clipPath: `inset(0 ${100 - sliderPos}% 0 0)` }}>
                 <img src={beforeUrl} srcSet={variantSet(beforeUrl, beforeUrlSmall)} sizes={SIZES}
-                    width={1200} height={800} alt="Преди ремонт" loading="lazy" decoding="async"
+                    width={1200} height={800} alt={`Преди ремонт${subject}`} loading="lazy" decoding="async"
                     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
 
