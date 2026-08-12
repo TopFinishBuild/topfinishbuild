@@ -14,10 +14,11 @@ export function usePageMeta(meta: PageMeta | null): void {
     const description = meta?.description;
     const path        = meta?.path;
     const noindex     = meta?.noindex;
+    const image       = meta?.image;
 
     useEffect(() => {
         if (title === undefined || description === undefined || path === undefined) return;
-        applyMeta({ title, description, path, noindex });
+        applyMeta({ title, description, path, noindex, image });
         if (!noindex) trackPageView(path, title);
-    }, [title, description, path, noindex]);
+    }, [title, description, path, noindex, image]);
 }

@@ -13,12 +13,17 @@ export const SITE_URL = 'https://topfinishbuild.bg';
 
 const BRAND = 'TopFinish Build';
 
+/** The share card built by scripts/make-og-image.mjs. Absolute — crawlers ignore relative. */
+export const OG_IMAGE = `${SITE_URL}/og-image.jpg`;
+
 export interface PageMeta {
     title: string;
     description: string;
     /** Path only, e.g. `/prices`. The canonical is always built on SITE_URL. */
     path: string;
     noindex?: boolean;
+    /** Absolute image URL for the share card. Defaults to the branded OG image. */
+    image?: string;
 }
 
 function metaTag(name: string): HTMLMetaElement {
@@ -26,6 +31,17 @@ function metaTag(name: string): HTMLMetaElement {
     if (!el) {
         el = document.createElement('meta');
         el.name = name;
+        document.head.appendChild(el);
+    }
+    return el;
+}
+
+/** og:* tags key off `property`, not `name` — a name-keyed tag is ignored by Facebook. */
+function ogTag(property: string): HTMLMetaElement {
+    let el = document.head.querySelector<HTMLMetaElement>(`meta[property="${property}"]`);
+    if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute('property', property);
         document.head.appendChild(el);
     }
     return el;
@@ -41,11 +57,30 @@ function canonicalTag(): HTMLLinkElement {
     return el;
 }
 
-export function applyMeta({ title, description, path, noindex }: PageMeta): void {
+export function applyMeta({ title, description, path, noindex, image }: PageMeta): void {
+    const url = SITE_URL + path;
+    const card = image ?? OG_IMAGE;
+
     document.title = title;
     metaTag('description').content = description;
     metaTag('robots').content = noindex ? 'noindex, nofollow' : 'index, follow';
-    canonicalTag().href = SITE_URL + path;
+    canonicalTag().href = url;
+
+    // Share card — og:url stays canonical so a link shared from .com and one shared
+    // from .bg count as the same page.
+    ogTag('og:title').content = title;
+    ogTag('og:description').content = description;
+    ogTag('og:url').content = url;
+    ogTag('og:image').content = card;
+    metaTag('twitter:title').content = title;
+    metaTag('twitter:description').content = description;
+    metaTag('twitter:image').content = card;
+
+    // The dimensions in index.html describe the default card only.
+    if (card !== OG_IMAGE) {
+        document.head.querySelector('meta[property="og:image:width"]')?.remove();
+        document.head.querySelector('meta[property="og:image:height"]')?.remove();
+    }
 }
 
 /** Static routes. Gallery is dynamic — see `galleryMeta` / `galleryImageMeta`. */
@@ -103,6 +138,8 @@ export interface GalleryImageInfo {
 
 export interface GalleryImageMeta extends GalleryImageInfo {
     slug: string;
+    /** Absolute photo URL (S3) — shared instead of the generic card. */
+    url?: string;
 }
 
 /** `/remont-snimki/{category}/{image}` — a deep link to one open photo. */
@@ -113,6 +150,7 @@ export function galleryImageMeta(item: GalleryImageMeta): PageMeta {
         path: `/remont-snimki/${item.slug}`,
         title: `${item.label}${where} – ${item.cat} | ${BRAND}`,
         description: `${item.label}${where}${size} – завършен обект от категория „${item.cat}“, изпълнен от TopFinish Build.`,
+        image: item.url,
     };
 }
 

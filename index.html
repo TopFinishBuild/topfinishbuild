@@ -3,7 +3,10 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <!-- Tab icon: the logo mark, white on brand navy (scripts/make-favicons.mjs) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Title / description / canonical are rewritten per route by src/utils/seo.ts.
        These are the homepage values, and what a crawler sees before JS runs. -->
@@ -12,6 +15,27 @@
     content="Топ Финиш Билд – довършителни ремонти в София. Шпакловка, боядисване, теракота, гипсокартон, ВиК и електро. 12+ години опит, 350+ завършени обекта." />
   <link rel="canonical" href="https://topfinishbuild.bg/" />
   <meta name="robots" content="index, follow" />
+
+  <!-- Share card (Facebook, Messenger, Viber, LinkedIn). The image is built by
+       scripts/make-og-image.mjs — without an explicit og:image the crawler grabs
+       whatever it finds first and crops the logo in half.
+       og:url stays on .bg so a link shared from .com counts as the same page. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="TopFinish Build" />
+  <meta property="og:locale" content="bg_BG" />
+  <meta property="og:title" content="Довършителни ремонти в София – TopFinish Build" />
+  <meta property="og:description"
+    content="Топ Финиш Билд – довършителни ремонти в София. Шпакловка, боядисване, теракота, гипсокартон, ВиК и електро. 12+ години опит, 350+ завършени обекта." />
+  <meta property="og:url" content="https://topfinishbuild.bg/" />
+  <meta property="og:image" content="https://topfinishbuild.bg/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="TopFinish Build – довършителни ремонти в София" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Довършителни ремонти в София – TopFinish Build" />
+  <meta name="twitter:description"
+    content="Довършителни ремонти в София. Шпакловка, боядисване, теракота, гипсокартон, ВиК и електро. 12+ години опит, 350+ завършени обекта." />
+  <meta name="twitter:image" content="https://topfinishbuild.bg/og-image.jpg" />
 
   <!-- Preload LCP hero image — browser fetches it immediately, before JS runs.
        imagesrcset/imagesizes must mirror the <img> in Hero.tsx, otherwise the
