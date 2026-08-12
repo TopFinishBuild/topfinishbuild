@@ -49,21 +49,9 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# One canonical host. The .com alias serves the same build, which Google reads as a
-# duplicate site — 301 it to .bg so the ranking signals land on one domain.
-# Must stay above the SPA fallback: Netlify applies the first matching rule.
-[[redirects]]
-  from = "https://topfinishbuild.com/*"
-  to = "https://topfinishbuild.bg/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "https://www.topfinishbuild.com/*"
-  to = "https://topfinishbuild.bg/:splat"
-  status = 301
-  force = true
-
+# .com stays live and serves the same build. Both domains are then duplicate content,
+# so the consolidation happens in the page instead: every route emits
+# <link rel="canonical"> and og:url on .bg (src/utils/seo.ts).
 # Sitemap is generated from the DB (server/functions/sitemap.ts) so every gallery
 # photo gets a URL. force = true: no static file may shadow it.
 [[redirects]]

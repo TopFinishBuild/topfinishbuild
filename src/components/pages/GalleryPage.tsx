@@ -141,7 +141,9 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
   // The gallery URL changes on a tab and on an open photo, so it titles itself:
   // an open image is its own indexable page, a tab is a category listing.
   const meta = useMemo(
-    () => current ? galleryImageMeta(current) : galleryMeta(tab === 'Всички' ? undefined : tab),
+    () => current
+      ? galleryImageMeta({ ...current, url: current.srcFull ?? current.src })
+      : galleryMeta(tab === 'Всички' ? undefined : tab),
     [current, tab],
   );
   usePageMeta(meta);
