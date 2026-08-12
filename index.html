@@ -5,9 +5,13 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TopFinish Build – Довършителни Ремонти</title>
+  <!-- Title / description / canonical are rewritten per route by src/utils/seo.ts.
+       These are the homepage values, and what a crawler sees before JS runs. -->
+  <title>Довършителни ремонти в София – TopFinish Build</title>
   <meta name="description"
-    content="Топ Финиш Билд – Довършителни ремонти в София. Шпакловка, боядисване, теракота. 12+ години опит, 350+ завършени обекта." />
+    content="Топ Финиш Билд – довършителни ремонти в София. Шпакловка, боядисване, теракота, гипсокартон, ВиК и електро. 12+ години опит, 350+ завършени обекта." />
+  <link rel="canonical" href="https://topfinishbuild.bg/" />
+  <meta name="robots" content="index, follow" />
 
   <!-- Preload LCP hero image — browser fetches it immediately, before JS runs.
        imagesrcset/imagesizes must mirror the <img> in Hero.tsx, otherwise the
@@ -74,10 +78,59 @@
     .stats-bar__number{font-size:40px;font-weight:900;color:#fff;line-height:1}
     .stats-bar__label{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-top:4px}
   </style>
+
+  <!-- LocalBusiness listing for Google. `telephone` is filled in from the settings API
+       (src/utils/seo.ts) because it is editable from the admin panel. -->
+  <script type="application/ld+json" id="ld-business">
+    {
+      "@context": "https://schema.org",
+      "@type": "HomeAndConstructionBusiness",
+      "@id": "https://topfinishbuild.bg/#business",
+      "name": "TopFinish Build",
+      "alternateName": "Топ Финиш Билд",
+      "description": "Довършителни ремонти в София – шпакловка, боядисване, теракота, гипсокартон, ВиК и електро инсталации.",
+      "url": "https://topfinishbuild.bg/",
+      "logo": "https://topfinishbuild.bg/logos/topfinish-build-logo.png",
+      "image": "https://topfinishbuild.bg/hero-1200.webp",
+      "email": "topfinishbuild@gmail.com",
+      "priceRange": "$$",
+      "currenciesAccepted": "BGN",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "София",
+        "addressCountry": "BG"
+      },
+      "areaServed": { "@type": "City", "name": "София" },
+      "knowsLanguage": "bg",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Довършителни ремонти",
+        "itemListElement": [
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Ремонт на баня и WC" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Настилки – теракота, гранитогрес, ламинат" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Шпакловка и боядисване" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "ВиК инсталации" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Електро инсталации" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Гипсокартон" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Мазилки" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Изолация" } }
+        ]
+      }
+    }
+  </script>
+
+  <!-- Google Analytics (gtag.js) — async, does not block render -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-P7T5GXZ4VV"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-P7T5GXZ4VV');
+  </script>
 </head>
 
 <body>
-  <div id="root"><div class="app-root"><header><nav><div><img src="/logos/topfinish-build-logo.png" alt="TopFinish Build" style="height:3rem;width:auto" /></div><div class="nav-desktop"><a href="#services" class="nav-link">Услуги</a><a href="#before-after" class="nav-link">Преди/След</a><a href="#gallery" class="nav-link">Галерия</a><a href="#calendar" class="nav-link">Календар</a><a href="#partners" class="nav-link">Партньори</a><a href="#prices" class="nav-link">Цени</a><a href="#about" class="nav-link">За нас</a><a href="#contact" class="btn-primary" style="padding:.6rem 1.5rem;font-size:.9375rem">Контакт</a></div><button class="nav-mobile-btn" aria-label="Отвори менюто"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button></nav></header><section class="hero-section"><div class="hero-bg-img"><img src="/hero-1200.webp" srcset="/hero-480.webp 480w, /hero-768.webp 768w, /hero-1200.webp 1200w, /hero-1600.webp 1600w" sizes="100vw" width="4000" height="1400" alt="" fetchpriority="high" decoding="async" /></div><div class="hero-overlay"></div><div class="hero-glows"><div class="hero-glow-orange"></div><div class="hero-glow-blue"></div></div><div class="hero-content"><div style="margin-bottom:1.5rem"><span class="hero-badge">Професионални Довършителни Работи</span></div><h1 class="hero-title">TopFinish Build<br /><span style="color:#f97316">Правилният избор</span></h1><p class="hero-subtitle">Перфекционизъм във всеки детайл</p><div class="hero-buttons"><a href="#calendar" class="btn-primary">Свържете се с нас</a><a href="#before-after" class="btn-ghost">Вижте Резултатите</a></div></div></section><div class="stats-bar"><div class="stats-bar__grid"><div class="stats-bar__item"><div class="stats-bar__number">0+</div><div class="stats-bar__label">Завършени обекта</div></div><div class="stats-bar__item"><div class="stats-bar__number">0</div><div class="stats-bar__label">Години опит</div></div><div class="stats-bar__item"><div class="stats-bar__number">0%</div><div class="stats-bar__label">Доволни клиенти</div></div></div></div></div></div>
+  <div id="root"><div class="app-root"><header><nav><div><img src="/logos/topfinish-build-logo.png" alt="TopFinish Build" style="height:3rem;width:auto" /></div><div class="nav-desktop"><a href="#services" class="nav-link">Услуги</a><a href="#before-after" class="nav-link">Преди/След</a><a href="#gallery" class="nav-link">Галерия</a><a href="#calendar" class="nav-link">Календар</a><a href="#partners" class="nav-link">Партньори</a><a href="#prices" class="nav-link">Цени</a><a href="#about" class="nav-link">За нас</a><a href="#contact" class="btn-primary" style="padding:.6rem 1.5rem;font-size:.9375rem">Контакт</a></div><button class="nav-mobile-btn" aria-label="Отвори менюто"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button></nav></header><section class="hero-section"><div class="hero-bg-img"><img src="/hero-1200.webp" srcset="/hero-480.webp 480w, /hero-768.webp 768w, /hero-1200.webp 1200w, /hero-1600.webp 1600w" sizes="100vw" width="4000" height="1400" alt="Довършителни ремонти в София – завършен интериор от TopFinish Build" fetchpriority="high" decoding="async" /></div><div class="hero-overlay"></div><div class="hero-glows"><div class="hero-glow-orange"></div><div class="hero-glow-blue"></div></div><div class="hero-content"><div style="margin-bottom:1.5rem"><span class="hero-badge">Професионални Довършителни Работи</span></div><h1 class="hero-title">TopFinish Build<br /><span style="color:#f97316">Правилният избор</span></h1><p class="hero-subtitle">Перфекционизъм във всеки детайл</p><div class="hero-buttons"><a href="#calendar" class="btn-primary">Свържете се с нас</a><a href="#before-after" class="btn-ghost">Вижте Резултатите</a></div></div></section><div class="stats-bar"><div class="stats-bar__grid"><div class="stats-bar__item"><div class="stats-bar__number">0+</div><div class="stats-bar__label">Завършени обекта</div></div><div class="stats-bar__item"><div class="stats-bar__number">0</div><div class="stats-bar__label">Години опит</div></div><div class="stats-bar__item"><div class="stats-bar__number">0%</div><div class="stats-bar__label">Доволни клиенти</div></div></div></div></div></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

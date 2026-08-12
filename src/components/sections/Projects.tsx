@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../../api/client';
 import ProjectCard from '../sections/ProjectCard';
 import { buildSlug } from '../../utils/slug';
+import { galleryImageAlt } from '../../utils/seo';
 import { SectionLabel } from '../common/SectionLabel';
 
 interface GalleryImage {
@@ -43,7 +44,11 @@ export default function Projects({ onViewAll, onNavigate }: ProjectsProps) {
                             onClick={() => onNavigate(`/remont-snimki/${buildSlug(img.category, img.label, img.city)}`)}
                             style={{ cursor: 'pointer' }}
                         >
-                            <ProjectCard label={img.label} src={img.urlSmall ?? img.url} />
+                            <ProjectCard
+                                label={img.label}
+                                src={img.urlSmall ?? img.url}
+                                alt={galleryImageAlt({ label: img.label, cat: img.category, city: img.city })}
+                            />
                         </div>
                     ))}
                 </div>

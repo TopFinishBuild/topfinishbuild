@@ -15,6 +15,7 @@ import { getSettings, updateSettings, updateWatermark, uploadWatermarkImage } fr
 import { listPartners, uploadPartner, deletePartner } from './partners.js';
 import { listTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from './testimonials.js';
 import { listBeforeAfter, createBeforeAfterPair, updateBeforeAfterPair, deleteBeforeAfterPair, reorderBeforeAfter } from './beforeafter.js';
+import { getSitemap } from './sitemap.js';
 import { authorizeAdmin } from './auth.js';
 
 const app = express();
@@ -32,6 +33,11 @@ app.use(cors());
 app.get('/api/health', (_req, res) => {
     res.status(200).json({ status: 'ok' });
 });
+
+// Sitemap — Netlify rewrites /sitemap.xml here. All three shapes are registered
+// because a rewrite can reach the function as the original path or as the function
+// path, and a 404 here silently costs the whole gallery its indexing.
+app.get(['/sitemap.xml', '/api/sitemap.xml', '/.netlify/functions/app/sitemap.xml'], getSitemap);
 
 // Auth
 app.post('/api/auth/login', login);
