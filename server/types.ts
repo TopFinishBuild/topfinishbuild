@@ -21,6 +21,10 @@ export interface GalleryImage {
     url: string;
     urlSmall?: string;
     order?: number;
+    /** At most one per category — the photo shown under „Любими“. */
+    favorite?: boolean;
+    /** Position among favorites, independent of `order`. */
+    favoriteOrder?: number;
     deleted?: boolean;
     createdAt: Date;
 }

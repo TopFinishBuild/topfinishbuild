@@ -49,7 +49,14 @@ export async function deleteCategory(req: Request, res: Response): Promise<void>
             res.status(404).json({ error: 'Категорията не е намерена' });
             return;
         }
-        await categories().deleteOne(filter);
+        // Its photos become uncategorised — a favorite without a category has nowhere to show.
+        await Promise.all([
+            categories().deleteOne(filter),
+            MongoDB.collection('gallery').updateMany(
+                { category: cat.name } as unknown as Filter<Document>,
+                { $unset: { favorite: '', favoriteOrder: '' } }
+            ),
+        ]);
         res.json({ ok: true });
     } catch (err) {
         res.status(500).json({ error: err instanceof Error ? err.message : 'Server error' });

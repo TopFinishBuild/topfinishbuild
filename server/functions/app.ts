@@ -7,7 +7,7 @@ import { login, changePassword, createUser } from './user.js';
 import {
     listGallery, listAdminGallery, uploadGalleryImage,
     softDeleteGalleryImage, restoreGalleryImage, hardDeleteGalleryImage,
-    reorderGallery,
+    reorderGallery, reorderFavorites, updateGalleryImage, setGalleryFavorite,
 } from './gallery.js';
 import { getCalendar, setCalendar } from './calendar.js';
 import { listCategories, addCategory, deleteCategory, reorderCategories, renameCategory } from './categories.js';
@@ -59,6 +59,9 @@ app.get('/api/gallery', listGallery);
 app.get('/api/gallery/admin', authorizeAdmin, listAdminGallery);
 app.post('/api/gallery', authorizeAdmin, uploadGalleryImage);
 app.put('/api/gallery/reorder', authorizeAdmin, reorderGallery);
+app.put('/api/gallery/favorites/reorder', authorizeAdmin, reorderFavorites);
+app.put('/api/gallery/:id', authorizeAdmin, updateGalleryImage);
+app.put('/api/gallery/:id/favorite', authorizeAdmin, setGalleryFavorite);
 app.delete('/api/gallery/:id', authorizeAdmin, softDeleteGalleryImage);
 app.patch('/api/gallery/:id/restore', authorizeAdmin, restoreGalleryImage);
 app.delete('/api/gallery/:id/hard', authorizeAdmin, hardDeleteGalleryImage);

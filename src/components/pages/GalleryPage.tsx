@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Star } from 'lucide-react';
 import ProjectCard from '../sections/ProjectCard';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useSwipe } from '../../hooks/useSwipe';
@@ -19,6 +20,8 @@ interface GalleryItem {
   city?: string;
   area?: string;
   slug: string;
+  favorite?: boolean;
+  favoriteOrder?: number;
 }
 
 interface GalleryPageProps {
@@ -26,9 +29,17 @@ interface GalleryPageProps {
   initialSlug?: string;
 }
 
+/** Pseudo-tab on the bare `/remont-snimki` URL: one favorite photo per category. */
+const FAV = 'Любими';
+
+const favoritesOf = (list: GalleryItem[]) =>
+  list.filter(i => i.favorite).sort((a, b) => (a.favoriteOrder ?? 0) - (b.favoriteOrder ?? 0));
+
+const listUrl = (t: string) => t === FAV ? '/remont-snimki' : `/remont-snimki/${toSlug(t)}`;
+
 export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProps) {
-  const [tab, setTab]           = useState('Всички');
-  const [cats, setCats]         = useState<string[]>(['Всички']);
+  const [tab, setTab]           = useState(FAV);
+  const [cats, setCats]         = useState<string[]>([]);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [allItems, setAllItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -37,9 +48,9 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
   useEffect(() => {
     Promise.all([
       fetchCategories(),
-      api.get<{ images: { _id: string; label: string; category: string; url: string; urlSmall?: string; materials?: string; duration?: string; city?: string; area?: string }[] }>('/gallery'),
+      api.get<{ images: { _id: string; label: string; category: string; url: string; urlSmall?: string; materials?: string; duration?: string; city?: string; area?: string; favorite?: boolean; favoriteOrder?: number }[] }>('/gallery'),
     ]).then(([catsData, galleryRes]) => {
-      setCats(['Всички', ...catsData.map(c => c.name)]);
+      setCats(catsData.map(c => c.name));
       const mapped = galleryRes.images.map(img => ({
         _id: img._id,
         cat: img.category,
@@ -50,26 +61,38 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
         city: img.city,
         area: img.area,
         slug: buildSlug(img.category, img.label, img.city),
+        favorite: img.favorite,
+        favoriteOrder: img.favoriteOrder,
       }));
       setAllItems(mapped);
 
-      // initialSlug with '/' = image, without = category filter
+      // No favorites picked yet — the tab is disabled, open the first category instead.
+      let start = favoritesOf(mapped).length > 0 ? FAV : (catsData[0]?.name ?? FAV);
+
+      // initialSlug with '/' = image (opens inside its category), without = category filter
       if (initialSlug) {
         if (initialSlug.includes('/')) {
-          const idx = mapped.findIndex(i => i.slug === initialSlug);
-          if (idx !== -1) setLightbox(idx);
+          const img = mapped.find(i => i.slug === initialSlug);
+          if (img) {
+            start = img.cat;
+            setLightbox(mapped.filter(i => i.cat === img.cat).indexOf(img));
+          }
         } else {
           const catMatch = catsData.find(c => toSlug(c.name) === initialSlug);
-          if (catMatch) setTab(catMatch.name);
+          if (catMatch) start = catMatch.name;
         }
+      } else if (start !== FAV) {
+        history.replaceState(null, '', listUrl(start));   // keep URL = shown category
       }
+      setTab(start);
     }).catch(() => { /* leave empty */ })
       .finally(() => setLoading(false));
   }, []);
 
-  const items = tab === 'Всички' ? allItems : allItems.filter(i => i.cat === tab);
-
-  const listUrl = (t: string) => t === 'Всички' ? '/remont-snimki' : `/remont-snimki/${toSlug(t)}`;
+  const favItems = useMemo(() => favoritesOf(allItems), [allItems]);
+  const favDisabled = !loading && favItems.length === 0;
+  const defaultTab = favItems.length > 0 ? FAV : (cats[0] ?? FAV);
+  const items = tab === FAV ? favItems : allItems.filter(i => i.cat === tab);
 
   /** True while the open lightbox owns a history entry we pushed ourselves. */
   const pushedEntry = useRef(false);
@@ -86,12 +109,12 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
       // A bare path or a category slug means: no image open.
       pushedEntry.current = false;
       setLightbox(null);
-      const match = slug ? cats.find(c => toSlug(c) === slug) : 'Всички';
+      const match = slug ? cats.find(c => toSlug(c) === slug) : defaultTab;
       if (match) setTab(match);
     };
     window.addEventListener('popstate', sync);
     return () => window.removeEventListener('popstate', sync);
-  }, [items, cats]);
+  }, [items, cats, defaultTab]);
 
   const openLightbox = (idx: number) => {
     setLightbox(idx);
@@ -143,7 +166,7 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
   const meta = useMemo(
     () => current
       ? galleryImageMeta({ ...current, url: current.srcFull ?? current.src })
-      : galleryMeta(tab === 'Всички' ? undefined : tab),
+      : galleryMeta(tab === FAV ? undefined : tab),
     [current, tab],
   );
   usePageMeta(meta);
@@ -158,14 +181,19 @@ export default function GalleryPage({ onNavigate, initialSlug }: GalleryPageProp
       <div className="gallery-page__content">
         <div className="container">
           <div className="gallery-page__filters">
-            {cats.map(c => (
+            {[FAV, ...cats].map(c => (
               <button key={c}
                 className={`gallery-page__filter-btn${tab === c ? ' active' : ''}`}
+                disabled={c === FAV && favDisabled}
+                title={c === FAV && favDisabled ? 'Все още няма избрани любими' : undefined}
                 onClick={() => {
                   setTab(c);
                   history.pushState(null, '', listUrl(c));
                 }}
-              >{c}</button>
+              >
+                {c === FAV && <Star size={13} fill="currentColor" strokeWidth={2.5} aria-hidden />}
+                {c}
+              </button>
             ))}
           </div>
           {loading && <p style={{ color: '#6b7280', padding: '40px 0' }}>Зареждане...</p>}

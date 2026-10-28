@@ -1,17 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
+import { Star, Pencil } from 'lucide-react';
 import { api } from '../../api/client';
 import { prepareImage } from '../../utils/image';
 import { fetchCategories, invalidateCategoriesCache, type Category } from '../../api/categoryCache';
+import GalleryFavorites, { type FavoriteImage } from './GalleryFavorites';
 
-interface GalleryImage {
-    _id: string;
-    label: string;
-    category: string;
+interface GalleryImage extends FavoriteImage {
     duration?: string;
     city?: string;
     area?: string;
-    url: string;
-    urlSmall?: string;
     order?: number;
     deleted?: boolean;
 }
@@ -40,7 +37,7 @@ function computeGlobalOrders(cats: DraftCat[], imgs: GalleryImage[]) {
     return result;
 }
 
-import { inp, lbl, card, sectionTitle, muted, successBox, errorBox, primaryBtn, ORANGE, NAVY, FH } from './theme';
+import { inp, lbl, card, sectionTitle, muted, successBox, errorBox, primaryBtn, ghostBtn, ORANGE, NAVY, FH } from './theme';
 
 const actionBtn = (active: boolean, orange = false): React.CSSProperties => ({
     background: orange ? (active ? ORANGE : '#fff') : (active ? '#f1f5f9' : '#fff'),
@@ -49,6 +46,18 @@ const actionBtn = (active: boolean, orange = false): React.CSSProperties => ({
     borderRadius: 8, padding: '8px 18px', fontSize: 13, fontWeight: 700, fontFamily: FH,
     cursor: active ? 'pointer' : 'not-allowed', opacity: active ? 1 : 0.55,
 });
+
+/** Small square button pinned to a corner of an image tile. */
+const tileBtn = (bg: string, side: 'left' | 'right', offset = 6): React.CSSProperties => ({
+    position: 'absolute', top: 6, [side]: offset, background: bg, border: 'none', borderRadius: 6,
+    width: 26, height: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+});
+
+const XIcon = () => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+);
+
+const EMPTY_FIELDS = { label: '', duration: '', city: '', area: '' };
 
 const DragHandle = () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#94a3b8', flexShrink: 0, cursor: 'grab' }}>
@@ -72,8 +81,11 @@ export default function GalleryManager() {
     const [showDeleted, setShowDeleted] = useState(false);
     const [editingCatIdx, setEditingCatIdx] = useState<number | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
+    const formRef = useRef<HTMLDivElement>(null);
 
-    const [form, setForm] = useState({ label: '', category: '', duration: '', city: '', area: '' });
+    /** Set while the upload form edits an existing image instead of adding one. */
+    const [editId, setEditId] = useState<string | null>(null);
+    const [form, setForm] = useState({ ...EMPTY_FIELDS, category: '' });
     const [preview, setPreview] = useState<string | null>(null);
     const [fileData, setFileData] = useState<{ base64: string; name: string; type: string } | null>(null);
 
@@ -257,30 +269,70 @@ export default function GalleryManager() {
         setFileData(data);
     };
 
-    const upload = async (e: React.FormEvent) => {
+    const resetForm = () => {
+        setForm(f => ({ ...f, ...EMPTY_FIELDS }));
+        setPreview(null); setFileData(null); setEditId(null);
+        if (fileRef.current) fileRef.current.value = '';
+    };
+
+    const flash = (msg: string) => { setSuccess(msg); setTimeout(() => setSuccess(''), 3000); };
+
+    const submit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!fileData) { setError('Изберете снимка'); return; }
+        if (!editId && !fileData) { setError('Изберете снимка'); return; }
         setUploading(true); setError('');
         try {
-            await api.post('/gallery', { file: fileData, ...form });
-            setSuccess('Снимката е качена успешно');
-            setForm(f => ({ ...f, label: '', duration: '', city: '', area: '' }));
-            setPreview(null); setFileData(null);
-            if (fileRef.current) fileRef.current.value = '';
-            await loadImages();
-            setTimeout(() => setSuccess(''), 3000);
+            if (editId) {
+                await api.put(`/gallery/${editId}`, form);
+                flash('Промените са запазени');
+            } else {
+                await api.post('/gallery', { file: fileData, ...form });
+                flash('Снимката е качена успешно');
+            }
+            resetForm();
+            await loadImages();   // an edit can move a favorite out of its category
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Грешка при качване');
+            setError(err instanceof Error ? err.message : 'Грешка при запазване');
         } finally { setUploading(false); }
     };
 
     // ── Image actions ───────────────────────────────────────────────────────
 
+    const startEdit = (img: GalleryImage) => {
+        // Orphans have no category in the list — fall back to the first one.
+        const category = savedCats.some(c => c.name === img.category) ? img.category : (savedCats[0]?.name ?? '');
+        setForm({ label: img.label, category, duration: img.duration ?? '', city: img.city ?? '', area: img.area ?? '' });
+        setPreview(img.urlSmall ?? img.url);
+        setFileData(null);
+        setEditId(img._id);
+        setError(''); setSuccess('');
+        formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    const toggleFavorite = async (img: GalleryImage) => {
+        try {
+            await api.put(`/gallery/${img._id}/favorite`, { favorite: !img.favorite });
+            await loadImages();   // server swaps out the category's previous favorite
+        } catch { setError('Грешка при запазване на любима'); }
+    };
+
+    const reorderFavorites = async (ids: string[]) => {
+        const pos = new Map(ids.map((id, i) => [id, i]));
+        setImages(prev => prev.map(img => pos.has(img._id) ? { ...img, favoriteOrder: pos.get(img._id) } : img));
+        try {
+            await api.put('/gallery/favorites/reorder', { items: ids.map((_id, order) => ({ _id, order })) });
+        } catch {
+            setError('Грешка при пренареждане');
+            await loadImages();
+        }
+    };
+
     const softDelete = async (id: string) => {
         if (!confirm('Изтрий снимката? (може да се възстанови)')) return;
         try {
             await api.delete(`/gallery/${id}`);
-            setImages(prev => prev.map(img => img._id === id ? { ...img, deleted: true } : img));
+            setImages(prev => prev.map(img => img._id === id ? { ...img, deleted: true, favorite: false } : img));
+            if (editId === id) resetForm();
         } catch { setError('Грешка при изтриване'); }
     };
 
@@ -384,14 +436,14 @@ export default function GalleryManager() {
                 </div>
             </div>
 
-            {/* Upload form */}
-            <div style={card}>
-                <h3 style={sectionTitle}>Качи нова снимка</h3>
-                <form onSubmit={upload} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+            {/* Upload / edit form */}
+            <div ref={formRef} style={{ ...card, scrollMarginTop: 80, ...(editId ? { border: `1.5px solid ${ORANGE}` } : {}) }}>
+                <h3 style={sectionTitle}>{editId ? 'Редактирай снимка' : 'Качи нова снимка'}</h3>
+                <form onSubmit={submit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
                     <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 20, alignItems: 'flex-start' }}>
                         <div
-                            onClick={() => fileRef.current?.click()}
-                            style={{ flexShrink: 0, width: 120, height: 100, borderRadius: 8, border: '2px dashed #e2e8f0', cursor: 'pointer', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}
+                            onClick={() => { if (!editId) fileRef.current?.click(); }}
+                            style={{ flexShrink: 0, width: 120, height: 100, borderRadius: 8, border: `2px ${editId ? 'solid' : 'dashed'} #e2e8f0`, cursor: editId ? 'default' : 'pointer', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}
                         >
                             {preview
                                 ? <img src={preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -419,13 +471,21 @@ export default function GalleryManager() {
                     {error   && <div style={{ gridColumn: '1/-1', ...errorBox }}>{error}</div>}
                     {success && <div style={{ gridColumn: '1/-1', ...successBox }}>{success}</div>}
 
-                    <div style={{ gridColumn: '1/-1' }}>
+                    <div style={{ gridColumn: '1/-1', display: 'flex', gap: 10 }}>
                         <button type="submit" disabled={uploading || savedCats.length === 0} style={primaryBtn(uploading || savedCats.length === 0)}>
-                            {uploading ? 'Качване...' : 'Качи снимката'}
+                            {editId
+                                ? (uploading ? 'Запазване...' : 'Запази промените')
+                                : (uploading ? 'Качване...' : 'Качи снимката')}
                         </button>
+                        {editId && <button type="button" onClick={resetForm} disabled={uploading} style={ghostBtn(uploading)}>Откажи</button>}
                     </div>
                 </form>
             </div>
+
+            {/* Favorites — one slot per category */}
+            {!loading && (
+                <GalleryFavorites images={displayImages} cats={draftCats} onReorder={ids => void reorderFavorites(ids)} />
+            )}
 
             {/* Active images grouped by category */}
             {loading ? (
@@ -456,10 +516,10 @@ export default function GalleryManager() {
                                                 onDrop={e => void onImgDrop(e, img._id)}
                                                 onDragEnd={() => { setDragImg(null); setDragImgOver(null); }}
                                                 style={{
-                                                    background: '#fff', border: '1.5px solid #e2e8f0',
+                                                    background: '#fff', border: `1.5px solid ${img.favorite ? ORANGE : '#e2e8f0'}`,
                                                     borderRadius: 10, overflow: 'hidden', position: 'relative',
                                                     cursor: 'grab',
-                                                    outline: dragImgOver === img._id ? `2px solid ${ORANGE}` : '2px solid transparent',
+                                                    outline: dragImgOver === img._id || editId === img._id ? `2px solid ${ORANGE}` : '2px solid transparent',
                                                     opacity: dragImg === img._id ? 0.4 : 1,
                                                     transition: 'outline 0.1s, opacity 0.1s',
                                                     boxShadow: '0 1px 3px rgba(15,31,61,0.06)',
@@ -468,13 +528,21 @@ export default function GalleryManager() {
                                                 <img src={img.urlSmall ?? img.url} alt={img.label} style={{ width: '100%', height: 130, objectFit: 'cover', display: 'block', pointerEvents: 'none' }} />
                                                 <div style={{ padding: '8px 10px' }}>
                                                     <p style={{ color: NAVY, fontSize: 12, fontWeight: 600, fontFamily: FH, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{img.label}</p>
+                                                    {img.favorite && <p style={{ color: ORANGE, fontSize: 11, fontWeight: 700, fontFamily: FH, margin: 0 }}>★ Любима</p>}
                                                 </div>
                                                 <button
-                                                    onClick={() => void softDelete(img._id)}
-                                                    style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(239,68,68,0.88)', border: 'none', borderRadius: 6, width: 26, height: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}
-                                                    title="Изтрий"
+                                                    onClick={() => void toggleFavorite(img)}
+                                                    style={tileBtn(img.favorite ? ORANGE : 'rgba(15,31,61,0.55)', 'left')}
+                                                    title={img.favorite ? 'Премахни от любими' : 'Направи любима (една на категория)'}
+                                                    aria-pressed={!!img.favorite}
                                                 >
-                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                                    <Star size={13} fill={img.favorite ? '#fff' : 'none'} strokeWidth={2.5} />
+                                                </button>
+                                                <button onClick={() => startEdit(img)} style={tileBtn('rgba(15,31,61,0.55)', 'right', 38)} title="Редактирай">
+                                                    <Pencil size={12} strokeWidth={2.5} />
+                                                </button>
+                                                <button onClick={() => void softDelete(img._id)} style={tileBtn('rgba(239,68,68,0.88)', 'right')} title="Изтрий">
+                                                    <XIcon />
                                                 </button>
                                             </div>
                                         ))}
@@ -500,8 +568,11 @@ export default function GalleryManager() {
                                                 <p style={{ color: NAVY, fontSize: 12, fontWeight: 600, fontFamily: FH, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{img.label}</p>
                                                 <p style={{ color: '#94a3b8', fontSize: 11, fontFamily: FH, margin: 0 }}>{img.category}</p>
                                             </div>
-                                            <button onClick={() => void softDelete(img._id)} style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(239,68,68,0.88)', border: 'none', borderRadius: 6, width: 26, height: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }} title="Изтрий">
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                            <button onClick={() => startEdit(img)} style={tileBtn('rgba(15,31,61,0.55)', 'right', 38)} title="Редактирай (смени категория)">
+                                                <Pencil size={12} strokeWidth={2.5} />
+                                            </button>
+                                            <button onClick={() => void softDelete(img._id)} style={tileBtn('rgba(239,68,68,0.88)', 'right')} title="Изтрий">
+                                                <XIcon />
                                             </button>
                                         </div>
                                     ))}
