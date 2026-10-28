@@ -1404,6 +1404,35 @@ html {
   border-color: var(--d7-orange);
 }
 
+/* Favorites row — horizontal scroll, 3 per view on desktop, peeking card on mobile */
+.projects__scroller {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  padding-bottom: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--d7-orange) rgba(255, 255, 255, 0.1);
+}
+
+.projects__slide {
+  flex: 0 0 calc((100% - 48px) / 3);
+  scroll-snap-align: start;
+  cursor: pointer;
+}
+
+/* Auto margins center a short row; they collapse to 0 once it overflows. */
+.projects__slide:first-child { margin-left: auto; }
+.projects__slide:last-child  { margin-right: auto; }
+
+@media (max-width: 767px) {
+  .projects__scroller { gap: 14px; }
+  .projects__slide { flex-basis: 85%; }
+}
+
 /* ── Carousel ── */
 .projects-carousel {
   position: relative;
@@ -1697,6 +1726,9 @@ html {
 }
 
 .gallery-page__filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 20px;
   font-family: var(--d7-fh);
   font-size: 13px;
@@ -1720,6 +1752,15 @@ html {
   background: var(--d7-orange);
   border-color: var(--d7-orange);
   color: var(--d7-white);
+}
+
+/* „Любими“ before any favorite is picked */
+.gallery-page__filter-btn:disabled,
+.gallery-page__filter-btn:disabled:hover {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: var(--d7-border);
+  color: var(--d7-navy);
 }
 
 .project-meta {
